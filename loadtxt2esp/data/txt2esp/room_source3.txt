@@ -1,0 +1,124 @@
+; comment line starts with a ";" - can't put a comment on the
+; same line with something else
+
+reference "northmarker" 1 <0 0 0> <0 0 0>
+
+; first a dwemer room ...
+; floor/ceiling center peice
+reference "in_dwrv_corr4_03" 1 <0 0 0> <0 0 0>
+; wall peice - north
+reference "in_dwrv_corr3_02" 1 <0 0 180> <128 384 0>
+; wall peice - south
+reference "in_dwrv_corr3_02" 1 <0 0 0> <0 -384 0>
+; wall peice - east
+reference "in_dwrv_corr3_02" 1 <0 0 -90> <448 -64 0>
+; room corner - north east
+reference "in_dwrv_corr2_03" 1 <0 0 -90> <448 320 0>
+; room corner - north west
+reference "in_dwrv_corr2_03" 1 <0 0 180> <-256 384 0>
+; room corner - south east
+reference "in_dwrv_corr2_03" 1 <0 0 0> <384 -384 0>
+; room corner - south west
+reference "in_dwrv_corr2_03" 1 <0 0 90> <-320 -320 0>
+; west wall - with doorway
+reference "in_dwrv_corr4_04" 1 <0 0 270> <-320 -64 0>
+; west wall door jam
+reference "in_dwrv_doorjam00" 1 <0 0 270> <-512 0 0>
+; two doors in the door jam ...
+reference "door_dwrv_inner00" 1 <0 0 270> <-512 -112 0>
+reference "door_dwrv_inner00" 1 <0 0 90> <-512 112 0>
+;
+; a guard so you can feel safe and stuff
+npc_ref "imperial guard" 1 <0 0 225> <384 304 -128>
+; something to guard against
+creature_ref "kwama forager" 1 <0 0 0> <-704 -384 -127>
+; door to balmora, interior
+tel_door_ref "in_hlaalu_door" 1 <0 0 180> <320 -64 379>  <0 0 270> <-208 0 -169> "Balmora, Guild of Mages"
+; door to balmora, exterior
+tel_door_ref "in_hlaalu_door" 1 <0 0 180> <320 -240 379>  <0 0 270> <-22377 -15203 641>
+;
+;
+; lights for the room
+;
+; north east corner light
+reference "light_dwrv_neon01" 1 <0  0 225> <560 496 0>
+; broken dwemer light in north wall
+reference "light_dwrv_neonbroke00" 1 <0  0 180> <-48 512 0>
+; north south west corner light
+reference "light_dwrv_neon01" 1 <0  0 45> <-432 -496 0>
+; light over door - room side
+reference "light_dwrv_neon01" 1 <0  0 90> <-496 0 80>
+; light over door - cooridor side
+reference "light_dwrv_neon01" 1 <0  0 270> <-528 0 80>
+;
+;
+;corridor leading from room
+; 2 elbows
+reference "in_dwrv_corr2_00" 1 <0 0 180> <-704 0 0>
+reference "in_dwrv_corr2_00" 1 <0 0 0> <-704 -384 0>
+; stairs up
+reference "in_dwrv_corr2_01" 1 <0 0 180> <-1024 -384 64>
+; 2 elbows
+reference "in_dwrv_corr2_00" 1 <0 0 90> <-1344 -384 192>
+reference "in_dwrv_corr2_00" 1 <0 0 180> <-1344 0 192>
+; stairs up
+reference "in_dwrv_corr2_01" 1 <0 0 0> <-1024 0 256>
+; straight peice
+reference "in_dwrv_corr2_04" 1 <0 0 0> <-768 0 384>
+; half length straight peice
+reference "in_dwrv_corr2_02" 1 <0 0 0> <-512 0 384>
+;
+; lights in the corridor
+reference "light_dwrv_neon01" 1 <0 0 315> <-592 -496 0>
+reference "light_dwrv_neon01" 1 <0 0 45> <-1456 -496 192>
+reference "light_dwrv_neon01" 1 <0 0 180> <-1264 128 192>
+reference "light_dwrv_neon01" 1 <0 0 0> <-672 -128 384>
+;
+;
+; upper room
+;
+; north west corner
+; floor/ceiling center peice
+reference "in_dwrv_corr4_03" 1 <0 0 0> <0 0 384>
+; wall peice - north
+reference "in_dwrv_corr3_02" 1 <0 0 180> <128 384 384>
+; wall peice - south
+reference "in_dwrv_corr3_02" 1 <0 0 0> <0 -384 384>
+; wall peice - east
+reference "in_dwrv_corr3_02" 1 <0 0 -90> <448 -64 384>
+; room corner - north east
+reference "in_dwrv_corr2_03" 1 <0 0 -90> <448 320 384>
+; room corner - north west
+reference "in_dwrv_corr2_03" 1 <0 0 180> <-256 384 384>
+; room corner - south east
+reference "in_dwrv_corr2_03" 1 <0 0 0> <384 -384 384>
+; room corner - south west
+reference "in_dwrv_corr2_03" 1 <0 0 90> <-320 -320 384>
+; west wall - with doorway
+reference "in_dwrv_corr4_04" 1 <0 0 270> <-320 -64 384>
+; west wall door jam
+reference "in_dwrv_doorjam00" 1 <0 0 270> <-512 0 384>
+; two doors in the door jam ...
+reference "door_dwrv_inner00" 1 <0 0 270> <-512 -112 384>
+reference "door_dwrv_inner00" 1 <0 0 90> <-512 112 384>
+;
+;
+; misc clutter in upper room
+;
+reference "crate_Smuggler_01" 1 <0 0 0> <-192 384 288>
+reference "active_de_p_bed_05" 1 <0 0 90> <-48 368 288>
+reference "misc_uni_pillow_01" 1 <0 0 101> <-86 431 311>
+reference "misc_uni_pillow_01" 1 <0 0 90> <-19 430 311>
+reference "furn_com_r_bookshelf_01" 1 <0 0 0> <176 448 352>
+reference "furn_com_tapestry_04" 1 <0 0 180> <400 528 480>
+reference "furn_de_kegstand" 1 <0 0 90> <496 432 318>
+reference "furn_de_rug_big_09" 1 <0 0 0> <400 256 256>
+reference "furn_com_tapestry_03" 1 <0 0 270> <592 112 480>
+reference "furn_com_rm_table_04" 1 <0 0 90> <-208 -288 287>
+reference "furn_de_rug_big_09" 1 <0 0 90> <16 -288 256>
+reference "light_com_candle_11_256" 1 <0 0 45> <-226 -246 337>
+;
+; more lights in the upper room
+reference "light_dwrv_neon01" 1 <0 0 270> <576 352 384>
+reference "light_dwrv_neon01" 1 <0 0 315> <560 -496 384>
+
