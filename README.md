@@ -1,6 +1,6 @@
 # tes3mp_scripts
 
-My tes3mp scripts
+My tes3mp(0.7-alpha) scripts
 
 
 
