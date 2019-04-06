@@ -3,6 +3,13 @@
 My tes3mp(0.7-alpha) scripts, most of the readme stuff will be in the top of the script files.
 
 
+## jcMarketplace
+Allows you to set a price on items and sell them, also blocks other people from picking stuff up.
+
+Supposed to be used with kanaHousing.
+
+Usage: see the scriptfile
+
 
 ## loadtxt2esp
 Load TXT2ESP4 files into a cell
