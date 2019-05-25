@@ -11,6 +11,16 @@ for _,subrecord in pairs(espParser.getAllSubRecords("MISC", "NAME")) do
 	doInfo(subrecord.data)
 end
 
+--get all Book ids function
+local getBookIds = function()
+	local out = {}
+	for _,subrecord in pairs(espParser.getAllSubRecords("BOOK", "NAME")) do
+		table.insert(out, subrecord.data)
+	end
+	return out
+end
+
+
 --all LongBladeOneHand Weapons
 require "custom.struct" --we're gonna need struct for this
 for _,record in pairs(espParser.getAllRecords("WEAP")) do --go thru all weapon records
