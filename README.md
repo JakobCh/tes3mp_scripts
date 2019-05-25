@@ -2,6 +2,12 @@
 
 My tes3mp(0.7-alpha) scripts, most of the readme stuff will be in the top of the script files.
 
+## espParser
+Helper file for other scripts to get data from esp/esm files.
+
+REQUIRES https://github.com/iryont/lua-struct
+
+Usage: See espParserTest.lua
 
 ## jcMarketplace
 Allows you to set a price on items and sell them, also blocks other people from picking stuff up.
