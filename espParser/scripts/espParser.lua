@@ -6,7 +6,7 @@
 	This does not parse the subrecord data! You have to do that yourself.
 	
 	Installation:
-		1. Put this file and struct.lua (https://github.com/iryont/lua-struct) in /server/scripts/custom/
+		1. Put this file and struct.lua ( https://github.com/iryont/lua-struct ) in /server/scripts/custom/
 		2. Add "require("custom.espParser")" to /server/scripts/customScripts.lua
 		3. Create a folder called "esps" in /server/data/custom/
 		4. Place your esp/esm files in the new folder (/server/data/custom/esps/)

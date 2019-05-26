@@ -20,6 +20,18 @@ local getBookIds = function()
 	return out
 end
 
+--get all Creatures ids function
+local getNPCIds = function()
+	local out = {}
+	for _,subrecord in pairs(espParser.getAllSubRecords("CREA", "NAME")) do
+		table.insert(out, subrecord.data)
+	end
+	for _,subrecord in pairs(espParser.getAllSubRecords("NPC_", "NAME")) do
+		table.insert(out, subrecord.data)
+	end
+	return out
+end
+
 
 --all LongBladeOneHand Weapons
 require "custom.struct" --we're gonna need struct for this
@@ -36,7 +48,7 @@ for _,record in pairs(espParser.getAllRecords("WEAP")) do --go thru all weapon r
 			if weaponType == 1 then --if the weapontype is "1 = LongBladeOneHand"
 				--print(subrecord.name)
 				--print(weaponType)
-				print(weaponName .. ": " .. tostring(weaponType))
+				--print(weaponName .. ": " .. tostring(weaponType))
 			end
 		end
 	end
@@ -58,5 +70,31 @@ for filename,records in pairs(espParser.files) do
 end
 ]]
 
+local out = {}
+for filename,records in pairs(espParser.files) do
+	out[filename] = {}
+	for _, record in pairs(records) do
+		if record.name == "CREA" or record.name == "NPC_" then
+			for _, subrecord in pairs(record.subRecords) do
+				if subrecord.name == "NAME" then
+					table.insert(out[filename], subrecord.data)
+				end
+			end
+		end
+	end
+end
+
+for _, id in pairs(out["Morrowind.esm"]) do
+	print(id)
+end
+
+--[[
+{
+	"Morrowind.esm": ["creature_id", "npc_id"],
+	"Tribunal.esm": [""]
+}
+]]--
+
 
 doInfo("[espParserTest] End")
+
