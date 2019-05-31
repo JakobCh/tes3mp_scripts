@@ -98,7 +98,7 @@ function bookWriting.createBook(pid)
     book["text"] = bookWriting.currentBooks[name].text
     book["value"] = 1
     book["scrollState"] = false --true
-    book["name"] = bookWriting.currentBooks[name].title
+    book["name"] = "*" .. bookWriting.currentBooks[name].title .. "*"
 
     print("before create book record")
     local bookId = bookWriting.nuCreateBookRecord(pid, book)
