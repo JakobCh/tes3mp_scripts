@@ -60,7 +60,6 @@ function bookWriting.onCommand(pid, cmd)
             msg(pid, "You haven't made a book yet, try using /book title <text>")
         else
             bookWriting.createBook(pid)
-            msg(pid, "You've made a book!")
         end
     elseif cmd[2] == "liststyle" or cmd[2] == "liststyles" then
         msg(pid, "Book Types:")
@@ -102,7 +101,19 @@ end
 function bookWriting.createBook(pid)
     --print("create book start")
     local name = Players[pid].name:lower()
-    --TODO check if they have paper
+
+
+    --Checks if players have the required Item(s)
+	if inventoryHelper.containsItem(Players[pid].data.inventory,"sc_paper plain") then
+		inventoryHelper.removeItem(Players[pid].data.inventory,"sc_paper plain",1)
+        msg(pid, color.Green .. "You wrote a book!")
+    elseif inventoryHelper.containsItem(Players[pid].data.inventory,"sc_paper_plain_01_canodia") then
+        inventoryHelper.removeItem(Players[pid].data.inventory,"sc_paper_plain_01_canodia",1)
+		msg(pid, color.Green .. "You wrote a book!")
+	else
+        msg(pid, color.Red .. "You lack the paper to write a book.")
+		return
+	end
 
 
     local model = bookWriting.bookStyles[bookWriting.currentBooks[name].type].model
