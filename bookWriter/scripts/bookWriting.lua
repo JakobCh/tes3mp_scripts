@@ -1,17 +1,20 @@
 bookWriting = {}
 
-bookWriting.currentBooks = {}
-bookWriting.bookTypes = {} -- { {model: "", icon: ""}, {model: "", icon: ""} }
+bookWriting.currentBooks = {} --used to store players individual in progress books
 
-table.insert(bookWriting.bookTypes, {model = "m\\Text_Octavo_08.nif", icon = "m\\Tx_book_02.tga", scroll = false, name = "Green Book"} )
-table.insert(bookWriting.bookTypes, {model = "m\\Text_Parchment_02.nif", icon = "m\\Tx_parchment_02.tga", scroll = true, name = "Letter"} )
-table.insert(bookWriting.bookTypes, {model = "m\\Text_Note_02.nif", icon = "m\\Tx_note_02.tga", scroll = true, name = "Note"} )
-table.insert(bookWriting.bookTypes, {model = "m\\Text_Octavo_06.nif", icon = "m\\Tx_book_03.tga", scroll = true, name = "Lesson of Vivec"} )
+--the book styles
+bookWriting.bookStyles = {}
+table.insert(bookWriting.bookStyles, {model = "m\\Text_Octavo_08.nif", icon = "m\\Tx_book_02.tga", scroll = false, name = "Green Book"} )
+table.insert(bookWriting.bookStyles, {model = "m\\Text_Parchment_02.nif", icon = "m\\Tx_parchment_02.tga", scroll = true, name = "Letter"} )
+table.insert(bookWriting.bookStyles, {model = "m\\Text_Note_02.nif", icon = "m\\Tx_note_02.tga", scroll = true, name = "Note"} )
+table.insert(bookWriting.bookStyles, {model = "m\\Text_Octavo_06.nif", icon = "m\\Tx_book_03.tga", scroll = true, name = "Lesson of Vivec"} )
+
+bookWriting.nameSymbol = "~" --the symbol used before and after book names to differintiate them from vanila books
+
 
 local msg = function(pid, text)
 	tes3mp.SendMessage(pid, color.GreenYellow .. "[BookWriting] " .. color.Default .. text .. "\n" .. color.Default)
 end
-
 
 function bookWriting.onCommand(pid, cmd)
     local name = Players[pid].name:lower()
@@ -35,15 +38,30 @@ function bookWriting.onCommand(pid, cmd)
             msg(pid, "You haven't made a book yet, try using /book title <text>")
         else
             bookWriting.createBook(pid)
+            msg(pid, "You've made a book!")
         end
-    elseif cmd[2] == "liststyle" then
+    elseif cmd[2] == "liststyle" or cmd[2] == "liststyles" then
         msg(pid, "Book Types:")
-        for i, bookType in pairs(bookWriting.bookTypes) do
+        for i, bookType in pairs(bookWriting.bookStyles) do
             msg(pid, tostring(i) .. ": " .. bookType.name)
         end
     elseif cmd[2] == "setstyle" then
         bookWriting.startBook(name)
+
+        if tonumber(cmd[3]) == nil then return end
+        if tonumber(cmd[3]) < 1 then return end
+        if tonumber(cmd[3]) > #bookWriting.bookStyles then return end
+
         bookWriting.currentBooks[name].type = tonumber(cmd[3])
+        msg(pid, "Style set.")
+    else
+        msg(pid, "Usage: /book <command>")
+        msg(pid, "  title <text>: Set the title of the book (Use this to create a new one).")
+        msg(pid, "  addtext <text>: Add text to the book.")
+        msg(pid, "  settext <text>: Set the text in the book (will remove all other text).")
+        msg(pid, "  liststyles: Lists all the styles.")
+        msg(pid, "  setstyles <number>: Sets the style.")
+        msg(pid, "  done: Make the book!")
     end
 end
 customCommandHooks.registerCommand("book", bookWriting.onCommand)
@@ -60,17 +78,17 @@ function bookWriting.startBook(name)
 end
 
 function bookWriting.createBook(pid)
-    print("create book start")
+    --print("create book start")
     local name = Players[pid].name:lower()
     --TODO check if they have paper
 
 
-    local model = bookWriting.bookTypes[bookWriting.currentBooks[name].type].model
-    local icon = bookWriting.bookTypes[bookWriting.currentBooks[name].type].icon
-    local scroll = bookWriting.bookTypes[bookWriting.currentBooks[name].type].scroll
+    local model = bookWriting.bookStyles[bookWriting.currentBooks[name].type].model
+    local icon = bookWriting.bookStyles[bookWriting.currentBooks[name].type].icon
+    local scroll = bookWriting.bookStyles[bookWriting.currentBooks[name].type].scroll
 
-    print(model)
-    print(icon)
+    --print(model)
+    --print(icon)
 
     local book = {}
     book["weight"] = 1
@@ -80,14 +98,14 @@ function bookWriting.createBook(pid)
     book["text"] = bookWriting.currentBooks[name].text
     book["value"] = 1
     book["scrollState"] = scroll --false --true
-    book["name"] = "*" .. bookWriting.currentBooks[name].title .. "*"
+    book["name"] = bookWriting.nameSymbol .. bookWriting.currentBooks[name].title .. bookWriting.nameSymbol
 
-    print("before create book record")
+    --print("before create book record")
     local bookId = bookWriting.nuCreateBookRecord(pid, book)
-    print("after bookId " .. tostring(bookId))
+    --print("after bookId " .. tostring(bookId))
     Players[pid]:AddLinkToRecord("book", bookId)
     inventoryHelper.addItem(Players[pid].data.inventory, bookId, 1)
-    print("after create book record")
+    --print("after create book record")
 
     --all them updates
     Players[pid]:Save()
