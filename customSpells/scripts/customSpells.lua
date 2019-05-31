@@ -43,6 +43,9 @@ local getSkillThatsChanged = function(pid)
 	for name in pairs(Player.data.skills) do
 		local skillId = tes3mp.GetSkillId(name)
 		--original[skillId] = name
+
+		if Player.data.skillProgress == nil then return nil end
+
 		local baseProgress = Player.data.skillProgress[name]
 		local changedProgress = tes3mp.GetSkillProgress(pid, skillId)
 		--msg(pid, name .. ":" .. tostring(baseProgress) .. "/" .. changedProgress )
@@ -61,11 +64,12 @@ customEventHooks.registerValidator("OnPlayerSkill", function(eventStatus, pid)
 	local selectedSpell = Players[pid].data.miscellaneous.selectedSpell
 	msg(pid, selectedSpell)
 	local changedSkill, skillAmount = getSkillThatsChanged(pid)
+	if changedSkill == nil then return end
+	if skillAmount == nil then return end
 	msg(pid, changedSkill)
 	msg(pid, skillAmount)
 
-	if skillAmount == nil then return end
-
+	
 	if skillAmount < 0.5 then return end
 
 	if CUSTOM_SPELLS[changedSkill] == nil then return end
