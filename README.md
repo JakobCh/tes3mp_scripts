@@ -37,6 +37,11 @@ Example usage:
 
 /book clear
 
+## customSpells
+Just like a proof of concept tbh
+
+Have a lua function get called when someone casts a specific spell.
+
 ## espParser
 Helper file for other scripts to get data from esp/esm files.
 
