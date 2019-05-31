@@ -71,11 +71,11 @@ jsonCellLoader.debug = false
 -- which might or might not have been copied from kanaFurniture https://github.com/Atkana/tes3mp-scripts
 -- or maybe its the other way around anyway we use this to check if a refId is a npc/creature
 local creatureList = {}
-local furnLoader = jsonInterface.load("npc.json")
+local furnLoader = jsonInterface.load("custom/npc.json")
 for index, item in pairs(furnLoader) do
 	table.insert(creatureList, {name = item.Name, refId = item.ID, tip = "npc", need = "spawn"})
 end
-local furnLoader = jsonInterface.load("creature.json")
+local furnLoader = jsonInterface.load("custom/creature.json")
 for index, item in pairs(furnLoader) do
 	table.insert(creatureList, {name = item.FIELD3, refId = item.FIELD2, tip = "creature", need = "spawn"} )
 end
