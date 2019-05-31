@@ -2,6 +2,41 @@
 
 My tes3mp(0.7-alpha) scripts, most of the readme stuff will be in the top of the script files.
 
+## bookWriter
+Chat commands for players to make custom books.
+
+Commands:
+
+/book title
+
+/book addtext
+
+/book settext
+
+/book liststyles
+
+/book setstyle
+
+/book done
+
+/book clear
+
+
+
+Example usage:
+
+/book title My Cool Book
+
+/book addtext Line 1\<br>
+
+/book addtext \<div align="center"> Centered Line 2 \<br>
+
+/book setstyle 3
+
+/book done
+
+/book clear
+
 ## espParser
 Helper file for other scripts to get data from esp/esm files.
 
