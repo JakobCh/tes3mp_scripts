@@ -1,3 +1,25 @@
+--[[
+Version: 0.2 for 0.7-alpha
+
+Install:
+	Put this file in server/scripts/custom/
+	Put [ require("custom.bookWriting") ] in customScripts.lua
+
+Commands:
+    /book: Help menu
+    /book title <text>: Set the Name of the book
+    /book addtext <text>: Add text to the book
+    /book settext <text>: Set the text in the book (will remove all previus text)
+    /book listsyles: lists all the styles
+    /book setstyle: sets the style the book is going to use
+    /book done: Creates the book
+    /book clear: Deletes the book
+
+Good to know:
+    You can use "/book done" several times as long at you dont use "/book clear" to make several copies of your book
+]]
+
+
 bookWriting = {}
 
 bookWriting.currentBooks = {} --used to store players individual in progress books
