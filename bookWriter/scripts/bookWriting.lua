@@ -3,29 +3,10 @@ bookWriting = {}
 bookWriting.currentBooks = {}
 bookWriting.bookTypes = {} -- { {model: "", icon: ""}, {model: "", icon: ""} }
 
-table.insert(bookWriting.bookTypes, {model = "m\\Text_Octavo_08.nif", icon = "m\\Tx_book_02.tga"} )
-
-if espParser then
-    --use espParser to get book models and icons
-    for _,record in pairs(espParser.getAllRecords("BOOK")) do
-        local model
-        local icon
-        local out = {}
-        for _, subrecord in pairs(record.subRecords) do
-            if subrecord.name == "MODL" then
-                model = subrecord.data
-            end
-            if subrecord.name == "ITEX" then
-                icon = subrecord.data
-            end
-        end
-        
-        out.model = model
-        out.icon = icon
-        table.insert(bookWriting.bookTypes, out)
-    end
-end
-
+table.insert(bookWriting.bookTypes, {model = "m\\Text_Octavo_08.nif", icon = "m\\Tx_book_02.tga", scroll = false, name = "Green Book"} )
+table.insert(bookWriting.bookTypes, {model = "m\\Text_Parchment_02.nif", icon = "m\\Tx_parchment_02.tga", scroll = true, name = "Letter"} )
+table.insert(bookWriting.bookTypes, {model = "m\\Text_Note_02.nif", icon = "m\\Tx_note_02.tga", scroll = true, name = "Note"} )
+table.insert(bookWriting.bookTypes, {model = "m\\Text_Octavo_06.nif", icon = "m\\Tx_book_03.tga", scroll = true, name = "Lesson of Vivec"} )
 
 local msg = function(pid, text)
 	tes3mp.SendMessage(pid, color.GreenYellow .. "[BookWriting] " .. color.Default .. text .. "\n" .. color.Default)
@@ -55,12 +36,12 @@ function bookWriting.onCommand(pid, cmd)
         else
             bookWriting.createBook(pid)
         end
-    elseif cmd[2] == "listtype" then
+    elseif cmd[2] == "liststyle" then
         msg(pid, "Book Types:")
         for i, bookType in pairs(bookWriting.bookTypes) do
-            msg(pid, tostring(i) .. ": " .. bookType.icon .. "  " .. bookType.model)
+            msg(pid, tostring(i) .. ": " .. bookType.name)
         end
-    elseif cmd[2] == "settype" then
+    elseif cmd[2] == "setstyle" then
         bookWriting.startBook(name)
         bookWriting.currentBooks[name].type = tonumber(cmd[3])
     end
@@ -86,6 +67,7 @@ function bookWriting.createBook(pid)
 
     local model = bookWriting.bookTypes[bookWriting.currentBooks[name].type].model
     local icon = bookWriting.bookTypes[bookWriting.currentBooks[name].type].icon
+    local scroll = bookWriting.bookTypes[bookWriting.currentBooks[name].type].scroll
 
     print(model)
     print(icon)
@@ -97,7 +79,7 @@ function bookWriting.createBook(pid)
     book["model"] = model --"m\\Text_Note_02.nif"
     book["text"] = bookWriting.currentBooks[name].text
     book["value"] = 1
-    book["scrollState"] = false --true
+    book["scrollState"] = scroll --false --true
     book["name"] = "*" .. bookWriting.currentBooks[name].title .. "*"
 
     print("before create book record")
