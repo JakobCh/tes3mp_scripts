@@ -29,7 +29,7 @@ bookWriting.bookStyles = {}
 table.insert(bookWriting.bookStyles, {model = "m\\Text_Octavo_08.nif", icon = "m\\Tx_book_02.tga", scroll = false, name = "Green Book"} )
 table.insert(bookWriting.bookStyles, {model = "m\\Text_Parchment_02.nif", icon = "m\\Tx_parchment_02.tga", scroll = true, name = "Letter"} )
 table.insert(bookWriting.bookStyles, {model = "m\\Text_Note_02.nif", icon = "m\\Tx_note_02.tga", scroll = true, name = "Note"} )
-table.insert(bookWriting.bookStyles, {model = "m\\Text_Octavo_06.nif", icon = "m\\Tx_book_03.tga", scroll = true, name = "Lesson of Vivec"} )
+table.insert(bookWriting.bookStyles, {model = "m\\Text_Octavo_06.nif", icon = "m\\Tx_book_03.tga", scroll = false, name = "Lesson of Vivec"} )
 
 bookWriting.nameSymbol = "~" --the symbol used before and after book names to differintiate them from vanila books
 
@@ -81,8 +81,9 @@ function bookWriting.onCommand(pid, cmd)
         msg(pid, "  addtext <text>: Add text to the book.")
         msg(pid, "  settext <text>: Set the text in the book (will remove all other text).")
         msg(pid, "  liststyles: Lists all the styles.")
-        msg(pid, "  setstyles <number>: Sets the style.")
+        msg(pid, "  setstyle <number>: Sets the style.")
         msg(pid, "  done: Make the book!")
+        msg(pid, "  clear: Clear all the book data so you can start a new one.")
     end
 end
 customCommandHooks.registerCommand("book", bookWriting.onCommand)
