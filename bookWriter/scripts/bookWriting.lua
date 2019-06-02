@@ -134,6 +134,21 @@ function bookWriting.createBook(pid)
     book["scrollState"] = scroll --false --true
     book["name"] = bookWriting.nameSymbol .. bookWriting.currentBooks[name].title .. bookWriting.nameSymbol
 
+    --check if that book already exists, then just give them a copy of that
+    for id,n in pairs(RecordStores["book"].data.generatedRecords) do
+        --print(tostring(id), tostring(n), n.name, n.text)
+        if n.name == book["name"] and n.text == book["text"] then
+            msg(pid, "You got a copy of your book!")
+            inventoryHelper.addItem(Players[pid].data.inventory, id, 1)
+            --all them updates
+            Players[pid]:Save()
+            Players[pid]:LoadInventory()
+            Players[pid]:LoadEquipment()
+            Players[pid]:LoadQuickKeys()
+            return
+        end
+    end
+
     --print("before create book record")
     local bookId = bookWriting.nuCreateBookRecord(pid, book)
     --print("after bookId " .. tostring(bookId))
