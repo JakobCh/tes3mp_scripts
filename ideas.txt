@@ -1,0 +1,1 @@
+logicHandler.RunConsoleCommandOnObject(pid, "ExplodeSpell, \"regenerate\"", cellDescription, objectRef)
