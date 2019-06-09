@@ -1,5 +1,5 @@
 --[[
-	espParser 0.2
+	espParser 0.3
 	By Jakob https://github.com/JakobCh
 	Mostly using: https://en.uesp.net/morrow/tech/mw_esm.txt
 	
@@ -28,51 +28,33 @@ espParser = {}
 
 --print(debug.getinfo(2, "S").source:sub(2))
 
-local Stream = {}
-Stream.__index = Stream
-function Stream:create(data)
+espParser.Stream = {}
+espParser.Stream.__index = espParser.Stream
+function espParser.Stream:create(data)
 	local newobj = {}
-	setmetatable(newobj, Stream)
+	setmetatable(newobj, espParser.Stream)
 	newobj.data = data
 	newobj.pointer = 1
 	return newobj
 end
-function Stream:len()
+function espParser.Stream:len()
 	return string.len(self.data)
 end
-function Stream:read(amount)
+function espParser.Stream:read(amount)
 	local temp = string.sub(self.data, self.pointer, self.pointer+amount-1)
 	self.pointer = self.pointer + amount
 	return temp
 end
-function Stream:sub(start, send)
+function espParser.Stream:sub(start, send)
 	local temp = string.sub(self.data, start, send)
 	return temp
 end
 
-local Record = {}
-Record.__index = Record
-function Record:create(stream)
-	--[[
-Record
-	4 bytes: char Name[4]
-		4-byte record name string (not null-terminated)
-	4 bytes: long Size    
-		Size of the record not including the 16 bytes of header data.
-	4 bytes: long Header1
-		Unknown value, usually 0 (deleted/ignored flag?).
-	4 bytes: long Flags
-		Record flags.
-			 0x00002000 = Blocked
-			 0x00000400 = Persistant
-	? bytes: SubRecords[]
-		All records are composed of a variable number of sub-records. There
-		is no sub-record count, just use the record Size value to determine
-		when to stop reading a record.
-	]]
-
+espParser.Record = {}
+espParser.Record.__index = espParser.Record
+function espParser.Record:create(stream)
 	local newobj = {}
-	setmetatable(newobj, Record)
+	setmetatable(newobj, espParser.Record)
 	newobj.name = stream:read(4) 
 	newobj.size = struct.unpack( "i", stream:read(4) )
 	--print("EEEE1")
@@ -83,12 +65,21 @@ Record
 	--print("OOO")
 
 	--get subrecords
-	local st = Stream:create(newobj.data)
+	local st = espParser.Stream:create(newobj.data)
 	while st.pointer < st:len() do
 		table.insert(newobj.subRecords, espParser.SubRecord:create(st) )
 	end
 
 	return newobj
+end
+function espParser.Record:getSubRecordsByName(name)
+	local out = {}
+	for _, subrecord in pairs(self.subRecords) do
+		if subrecord.name == name then
+			table.insert(out, subrecord)
+		end
+	end
+	return out
 end
 
 --has to be global so Record can access it
@@ -133,7 +124,8 @@ espParser.getAllSubRecords = function(recordName, subRecordName)
 	return out
 end
 
-espParser.files = {}
+
+espParser.files = {} --contains each .esp file as a key
 
 espParser.addEsp = function(filename)
 	local currentFile = filename
@@ -144,10 +136,10 @@ espParser.addEsp = function(filename)
 		return
 	end
 	
-	local mainStream = Stream:create(f:read("*a")) --read all
+	local mainStream = espParser.Stream:create(f:read("*a")) --read all
 	espParser.files[currentFile] = {}
 	while mainStream.pointer < mainStream:len() do
-		local r = Record:create(mainStream)
+		local r = espParser.Record:create(mainStream)
 		table.insert(espParser.files[currentFile], r)
 		
 	end
