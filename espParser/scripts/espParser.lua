@@ -131,10 +131,13 @@ espParser.addEsp = function(filename)
 	local currentFile = filename
 	
 	--print(tes3mp.GetDataPath() .. "\\custom\\esps\\" .. currentFile)
-	local f = io.open(tes3mp.GetDataPath() .. "\\custom\\esps\\" .. currentFile, "rb") --open file handler
+	local f
+	f = io.open(tes3mp.GetDataPath() .. "\\custom\\esps\\" .. currentFile, "rb") --open file handler (windows)
 	if f == nil then
-		return
+		f = io.open(tes3mp.GetDataPath() .. "/custom/esps/" .. currentFile, "rb") --open file handler (linux)
 	end
+
+	if f == nil then return false end --could not open the file
 	
 	local mainStream = espParser.Stream:create(f:read("*a")) --read all
 	espParser.files[currentFile] = {}
@@ -143,13 +146,18 @@ espParser.addEsp = function(filename)
 		table.insert(espParser.files[currentFile], r)
 		
 	end
-	tes3mp.LogMessage(enumerations.log.INFO, "[espParser] Loaded: " .. currentFile) 
+	--tes3mp.LogMessage(enumerations.log.INFO, "[espParser] Loaded: " .. currentFile) 
+	return true
 end
 
 -- Load all the files in the config
 tes3mp.LogMessage(enumerations.log.INFO, "[espParser] Loading files...") 
 for i,name in pairs(files) do
-	espParser.addEsp(name)
+	if espParser.addEsp(name) then
+		tes3mp.LogMessage(enumerations.log.INFO, "[espParser] Loaded: " .. name) 
+	else
+		tes3mp.LogMessage(enumerations.log.INFO, "[espParser] Failed to load: " .. name) 
+	end
 end
 tes3mp.LogMessage(enumerations.log.INFO, "[espParser] Finished!") 
 
