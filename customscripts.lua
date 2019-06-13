@@ -1,6 +1,6 @@
 require("custom.customSpells")
 require("custom.espParser")
---require("custom.espParserTest")
+require("custom.espParserTest")
 require("custom.doorLinks")
 --require("custom.jcMarketplace")
 require("custom.jsonCellLoader")

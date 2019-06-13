@@ -160,29 +160,31 @@ espParser.parseCells = function(filename) --filename already loaded in espParser
 	end
 	espParser.files[filename].cells = {}
 
-	for _, record in pairs(records) do
-		local cell = {}
-		cell.id = record:getSubRecordsByName("NAME")[1].data
-		cell.data = record:getSubRecordsByName("DATA")[1].data
-		cell.region = record:getSubRecordsByName("RGNN")[1].data
-		--cell.nam0 = record:getSubRecordsByName("NAM0")[1].data
+	local lenTable = {
+		i = 4,
+		f = 4,
+	}
 
-		if #record:getSubRecordsByName("NAM5") == 1 then --its a external cell
-			cell.isExternal = true
-			cell.mapColor = record:getSubRecordsByName("NAM5")[1].data
-		else --its a internal cell
-			cell.isExternal = false
-			cell.waterHeight = struct.unpack( "f", record:getSubRecordsByName("WHGT")[1].data )
-			local stream = espParser.Stream:create( record:getSubRecordsByName("AMBI")[1].data )
-			cell.ambientColor = struct.unpack( "i", stream:read(4) )
-			cell.sunlightColor = struct.unpack( "i", stream:read(4) )
-			cell.fogColor = struct.unpack( "i", stream:read(4) )
-			cell.fogDensity = struct.unpack( "f", stream:read(4) )
-		end
-
-		cell.objects = {}
-
-		local subRecordTypes = {
+	local dataTypes = {
+		Unique = {
+			{"NAME", "s", "id"},
+			{"DATA", {
+				{"i", "flags"},
+				{"i", "gridX"},
+				{"i", "gridY"}
+			}},
+			{"RGNN", "s", "region"},
+			{"NAM0", "i", "NAM0"},
+			{"NAM5", "i", "mapColor"},
+			{"WHGT", "f", "waterHeight"},
+			{"AMBI", {
+				{"i", "ambientColor"},
+				{"i", "sunlightColor"},
+				{"i", "fogColor"},
+				{"f", "fogDensity"}
+			}}
+		},
+		Multi = {
 			{"NAME", "s", "refId"},
 			{"XSCL", "f", "scale"},
 			{"DELE", "i", "deleted"},
@@ -197,12 +199,43 @@ espParser.parseCells = function(filename) --filename already loaded in espParser
 			{"NAM9", "i", "NAM9"}, --?
 			{"XSOL", "s", "soul"}
 		}
+	}
+
+	for _, record in pairs(records) do
+		local cell = {}
+		
+		for _, dType in pairs(dataTypes.Unique) do
+			local tempData = record:getSubRecordsByName(dType[1])[1]
+			if tempData ~= nil then
+				if type(dType[2]) == "table" then
+					local stream = espParser.Stream:create( tempData.data )
+					for _, ddType in pairs(dType[2]) do
+						cell[ddType[2]] = struct.unpack( ddType[1], stream:read(4) )
+					end
+				else
+					--print(dType[2], tempData.data)
+					cell[dType[3]] = struct.unpack( dType[2], tempData.data )
+				end
+			end
+		end
+
+		if cell.id == "" then --its a external cell
+			cell.isExternal = true
+			cell.id = cell.gridX .. ", " .. cell.gridY
+
+		else --its a internal cell
+			cell.isExternal = false
+		end
+
+		cell.objects = {}
 
 		local currentIndex = nil
 
 		for _, subrecord in pairs(record.subRecords) do
 			if subrecord.name == "FRMR" then
 				currentIndex = struct.unpack( "i", subrecord.data )
+				cell.objects[currentIndex] = {}
+				cell.objects[currentIndex].scale = 1
 			end
 
 			if subrecord.name == "DODT" and currentIndex ~= nil then
@@ -229,13 +262,9 @@ espParser.parseCells = function(filename) --filename already loaded in espParser
 				}
 			end
 
-			for _, type in pairs(subRecordTypes) do
+			for _, type in pairs(dataTypes.Multi) do
 				if subrecord.name == type[1] and currentIndex ~= nil then
-					if type[2] == "s" then
-						cell.objects[currentIndex][type[3]] = subrecord.data
-					else
-						cell.objects[currentIndex][type[3]] = struct.unpack( type[2], subrecord.data )
-					end
+					cell.objects[currentIndex][type[3]] = struct.unpack( type[2], subrecord.data )
 				end
 			end
 		end
@@ -261,8 +290,10 @@ espParser.addEsp = function(filename)
 	while mainStream.pointer < mainStream:len() do
 		local r = espParser.Record:create(mainStream)
 		table.insert(espParser.rawFiles[currentFile], r)
-		
 	end
+
+	espParser.parseCells(currentFile)
+
 	--tes3mp.LogMessage(enumerations.log.INFO, "[espParser] Loaded: " .. currentFile) 
 	return true
 end

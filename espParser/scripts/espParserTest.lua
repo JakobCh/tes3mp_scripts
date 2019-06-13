@@ -1,13 +1,28 @@
 
 
 local doInfo = function(text)
-	tes3mp.LogMessage(enumerations.log.INFO, text) 
+	tes3mp.LogMessage(enumerations.log.INFO, "[espParserTest] " .. text) 
 end
 
-doInfo("[espParserTest] Start")
+doInfo("Start")
+
+-- new cells
+
+for _, cell in pairs(espParser.files["Tribunal.esm"].cells) do
+	for key, obj in pairs(cell.objects) do
+		doInfo(key .. ": " .. obj.refId .. " " .. obj.scale)
+	end
+	break
+	--doInfo(cell.id)
+	--for i, obj in pairs(cell.objects) do
+	--	doInfo("    " .. tostring(i) .. ": " .. obj.refId)
+	--end
+end
+
 
 
 -- figure out spell ids
+--[[
 for _,record in pairs(espParser.getAllRecords("MGEF")) do --go thru all magic effect records
 	
 	local spellId
@@ -23,24 +38,30 @@ for _,record in pairs(espParser.getAllRecords("MGEF")) do --go thru all magic ef
 		end
 	end
 end
+]]
 
 
 --get all Misc ids
---[[for _,subrecord in pairs(espParser.getAllSubRecords("MISC", "NAME")) do
+--[[
+for _,subrecord in pairs(espParser.getAllSubRecords("MISC", "NAME")) do
 	doInfo(subrecord.data)
-end]]
+end
+]]
 
 --get all Book ids function
---[[local getBookIds = function()
+--[[
+local getBookIds = function()
 	local out = {}
 	for _,subrecord in pairs(espParser.getAllSubRecords("BOOK", "NAME")) do
 		table.insert(out, subrecord.data)
 	end
 	return out
-end]]
+end
+]]
 
 --get all Creatures ids function
---[[local getNPCIds = function()
+--[[
+local getNPCIds = function()
 	local out = {}
 	for _,subrecord in pairs(espParser.getAllSubRecords("CREA", "NAME")) do
 		table.insert(out, subrecord.data)
@@ -49,11 +70,13 @@ end]]
 		table.insert(out, subrecord.data)
 	end
 	return out
-end]]
+end
+]]
 
 
 --all LongBladeOneHand Weapons
---[[require "custom.struct" --we're gonna need struct for this
+--[[
+require "custom.struct" --we're gonna need struct for this
 for _,record in pairs(espParser.getAllRecords("WEAP")) do --go thru all weapon records
 	
 	local weaponName
@@ -71,11 +94,12 @@ for _,record in pairs(espParser.getAllRecords("WEAP")) do --go thru all weapon r
 			end
 		end
 	end
-end]]
+end
+]]
 
 --Get all misc item ids
 --[[
-for filename,records in pairs(espParser.files) do
+for filename, records in pairs(espParser.rawFiles) do
 	doInfo("Found file " .. filename)
 	for _,record in pairs(records) do
 		if record.name == "MISC" then
@@ -91,7 +115,7 @@ end
 
 --[[
 local out = {}
-for filename,records in pairs(espParser.files) do
+for filename,records in pairs(espParser.rawFiles) do
 	out[filename] = {}
 	for _, record in pairs(records) do
 		if record.name == "CREA" or record.name == "NPC_" then
@@ -106,7 +130,8 @@ end
 
 for _, id in pairs(out["Morrowind.esm"]) do
 	print(id)
-end]]
+end
+]]
 
 --[[
 {
@@ -116,5 +141,5 @@ end]]
 ]]--
 
 
-doInfo("[espParserTest] End")
+doInfo("End")
 
