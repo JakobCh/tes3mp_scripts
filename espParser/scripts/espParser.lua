@@ -244,9 +244,9 @@ espParser.parseCells = function(filename) --filename already loaded in espParser
 					XPos = struct.unpack( "f", stream:read(4) ),
 					YPos = struct.unpack( "f", stream:read(4) ),
 					ZPos = struct.unpack( "f", stream:read(4) ),
-					XRotate = struct.unpack( "f", stream:read(4) ),
-					YRotate = struct.unpack( "f", stream:read(4) ),
-					ZRotate = struct.unpack( "f", stream:read(4) )
+					XRot = struct.unpack( "f", stream:read(4) ),
+					YRot = struct.unpack( "f", stream:read(4) ),
+					ZRot = struct.unpack( "f", stream:read(4) )
 				}
 			end
 
@@ -256,9 +256,9 @@ espParser.parseCells = function(filename) --filename already loaded in espParser
 					XPos = struct.unpack( "f", stream:read(4) ),
 					YPos = struct.unpack( "f", stream:read(4) ),
 					ZPos = struct.unpack( "f", stream:read(4) ),
-					XRotate = struct.unpack( "f", stream:read(4) ),
-					YRotate = struct.unpack( "f", stream:read(4) ),
-					ZRotate = struct.unpack( "f", stream:read(4) )
+					XRot = struct.unpack( "f", stream:read(4) ),
+					YRot = struct.unpack( "f", stream:read(4) ),
+					ZRot = struct.unpack( "f", stream:read(4) )
 				}
 			end
 
