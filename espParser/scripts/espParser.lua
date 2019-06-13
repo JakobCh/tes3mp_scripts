@@ -1,5 +1,5 @@
 --[[
-	espParser 0.3
+	espParser 0.4
 	By Jakob https://github.com/JakobCh
 	Mostly using: https://en.uesp.net/morrow/tech/mw_esm.txt
 	
@@ -28,6 +28,7 @@ espParser = {}
 
 --print(debug.getinfo(2, "S").source:sub(2))
 
+--Stream class
 espParser.Stream = {}
 espParser.Stream.__index = espParser.Stream
 function espParser.Stream:create(data)
@@ -50,6 +51,7 @@ function espParser.Stream:sub(start, send)
 	return temp
 end
 
+--Record class
 espParser.Record = {}
 espParser.Record.__index = espParser.Record
 function espParser.Record:create(stream)
@@ -57,12 +59,10 @@ function espParser.Record:create(stream)
 	setmetatable(newobj, espParser.Record)
 	newobj.name = stream:read(4) 
 	newobj.size = struct.unpack( "i", stream:read(4) )
-	--print("EEEE1")
 	newobj.header1 = struct.unpack( "i", stream:read(4) )
 	newobj.flags = struct.unpack( "i", stream:read(4) )
 	newobj.data = stream:read(newobj.size)
 	newobj.subRecords = {}
-	--print("OOO")
 
 	--get subrecords
 	local st = espParser.Stream:create(newobj.data)
@@ -82,7 +82,7 @@ function espParser.Record:getSubRecordsByName(name)
 	return out
 end
 
---has to be global so Record can access it
+--SubRecord class
 espParser.SubRecord = {}
 espParser.SubRecord.__index = espParser.SubRecord
 function espParser.SubRecord:create(stream)
@@ -96,6 +96,30 @@ function espParser.SubRecord:create(stream)
 end
 
 --helper functions
+espParser.getRecords = function(filename, recordName)
+	local out = {}
+	for i,record in pairs(espParser.rawFiles[filename]) do
+		if record.name == recordName then
+			table.insert(out, record)
+		end
+	end
+	return out
+end
+
+espParser.getSubRecords = function(filename, recordName, subRecordName)
+	local out = {}
+	for _,record in pairs(espParser.rawFiles[filename]) do
+		if record.name == recordName then
+			for _, subrecord in pairs(record.subRecords) do
+				if subrecord.name == subRecordName then
+					table.insert(out, subrecord)
+				end
+			end
+		end
+	end
+	return out
+end
+
 espParser.getAllRecords = function(recordName)
 	local out = {}
 	for filename,records in pairs(espParser.files) do
@@ -125,7 +149,100 @@ espParser.getAllSubRecords = function(recordName, subRecordName)
 end
 
 
+espParser.rawFiles = {} --contains each .esp file as a key (raw Records and subrecords)
 espParser.files = {} --contains each .esp file as a key
+
+espParser.parseCells = function(filename) --filename already loaded in espParser.rawFiles
+	local records = espParser.getRecords(filename, "CELL")
+
+	if espParser.files[filename] == nil then
+		espParser.files[filename] = {}
+	end
+	espParser.files[filename].cells = {}
+
+	for _, record in pairs(records) do
+		local cell = {}
+		cell.id = record:getSubRecordsByName("NAME")[1].data
+		cell.data = record:getSubRecordsByName("DATA")[1].data
+		cell.region = record:getSubRecordsByName("RGNN")[1].data
+		--cell.nam0 = record:getSubRecordsByName("NAM0")[1].data
+
+		if #record:getSubRecordsByName("NAM5") == 1 then --its a external cell
+			cell.isExternal = true
+			cell.mapColor = record:getSubRecordsByName("NAM5")[1].data
+		else --its a internal cell
+			cell.isExternal = false
+			cell.waterHeight = struct.unpack( "f", record:getSubRecordsByName("WHGT")[1].data )
+			local stream = espParser.Stream:create( record:getSubRecordsByName("AMBI")[1].data )
+			cell.ambientColor = struct.unpack( "i", stream:read(4) )
+			cell.sunlightColor = struct.unpack( "i", stream:read(4) )
+			cell.fogColor = struct.unpack( "i", stream:read(4) )
+			cell.fogDensity = struct.unpack( "f", stream:read(4) )
+		end
+
+		cell.objects = {}
+
+		local subRecordTypes = {
+			{"NAME", "s", "refId"},
+			{"XSCL", "f", "scale"},
+			{"DELE", "i", "deleted"},
+			{"DNAM", "s", "doorExitName"},
+			{"FLTV", "i", "lockLevel"},
+			{"KNAM", "s", "doorKey"},
+			{"TNAM", "s", "trapName"},
+			{"UNAM", "B", "referenceBlocked"},
+			{"ANAM", "s", "owner"},
+			{"BNAM", "s", "id"}, -- Global variable/rank ID string
+			{"INTV", "i", "uses"},
+			{"NAM9", "i", "NAM9"}, --?
+			{"XSOL", "s", "soul"}
+		}
+
+		local currentIndex = nil
+
+		for _, subrecord in pairs(record.subRecords) do
+			if subrecord.name == "FRMR" then
+				currentIndex = struct.unpack( "i", subrecord.data )
+			end
+
+			if subrecord.name == "DODT" and currentIndex ~= nil then
+				local stream = espParser.Stream:create( subrecord.data )
+				cell.objects[currentIndex].doorLocation = {
+					XPos = struct.unpack( "f", stream:read(4) ),
+					YPos = struct.unpack( "f", stream:read(4) ),
+					ZPos = struct.unpack( "f", stream:read(4) ),
+					XRotate = struct.unpack( "f", stream:read(4) ),
+					YRotate = struct.unpack( "f", stream:read(4) ),
+					ZRotate = struct.unpack( "f", stream:read(4) )
+				}
+			end
+
+			if subrecord.name == "DATA" and currentIndex ~= nil then
+				local stream = espParser.Stream:create( subrecord.data )
+				cell.objects[currentIndex].location = {
+					XPos = struct.unpack( "f", stream:read(4) ),
+					YPos = struct.unpack( "f", stream:read(4) ),
+					ZPos = struct.unpack( "f", stream:read(4) ),
+					XRotate = struct.unpack( "f", stream:read(4) ),
+					YRotate = struct.unpack( "f", stream:read(4) ),
+					ZRotate = struct.unpack( "f", stream:read(4) )
+				}
+			end
+
+			for _, type in pairs(subRecordTypes) do
+				if subrecord.name == type[1] and currentIndex ~= nil then
+					if type[2] == "s" then
+						cell.objects[currentIndex][type[3]] = subrecord.data
+					else
+						cell.objects[currentIndex][type[3]] = struct.unpack( type[2], subrecord.data )
+					end
+				end
+			end
+		end
+
+		espParser.files[filename].cells[cell.id] = cell
+	end
+end
 
 espParser.addEsp = function(filename)
 	local currentFile = filename
@@ -140,10 +257,10 @@ espParser.addEsp = function(filename)
 	if f == nil then return false end --could not open the file
 	
 	local mainStream = espParser.Stream:create(f:read("*a")) --read all
-	espParser.files[currentFile] = {}
+	espParser.rawFiles[currentFile] = {}
 	while mainStream.pointer < mainStream:len() do
 		local r = espParser.Record:create(mainStream)
-		table.insert(espParser.files[currentFile], r)
+		table.insert(espParser.rawFiles[currentFile], r)
 		
 	end
 	--tes3mp.LogMessage(enumerations.log.INFO, "[espParser] Loaded: " .. currentFile) 
