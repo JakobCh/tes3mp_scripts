@@ -65,12 +65,12 @@ for _,record in pairs(espParser.getAllRecords("CELL")) do --go thru all cell rec
 					local temp = {
 						refId = _refId,
 						location = {
-							XPos = struct.unpack( "i", stream:read(4) ),
-							YPos = struct.unpack( "i", stream:read(4) ),
-							ZPos = struct.unpack( "i", stream:read(4) ),
-							XRotate = struct.unpack( "i", stream:read(4) ),
-							YRotate = struct.unpack( "i", stream:read(4) ),
-							ZRotate = struct.unpack( "i", stream:read(4) )
+							XPos = struct.unpack( "f", stream:read(4) ),
+							YPos = struct.unpack( "f", stream:read(4) ),
+							ZPos = struct.unpack( "f", stream:read(4) ),
+							XRotate = struct.unpack( "f", stream:read(4) ),
+							YRotate = struct.unpack( "f", stream:read(4) ),
+							ZRotate = struct.unpack( "f", stream:read(4) )
 						},
 						cell = exitName
 					}
