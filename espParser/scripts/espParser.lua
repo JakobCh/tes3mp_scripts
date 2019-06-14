@@ -1,9 +1,14 @@
 --[[
-	espParser 0.4
+	espParser 0.5
 	By Jakob https://github.com/JakobCh
 	Mostly using: https://en.uesp.net/morrow/tech/mw_esm.txt
 	
-	This does not parse the subrecord data! You have to do that yourself.
+	Updates will probably break your shit right now in the early stages.
+
+	Almost all record/subrecord data isn't parsed.
+
+	Things that are currently parsed:
+		Cells - espParser.files["Morrowind.esm"].cells
 	
 	Installation:
 		1. Put this file and struct.lua ( https://github.com/iryont/lua-struct ) in /server/scripts/custom/
@@ -150,7 +155,8 @@ end
 
 
 espParser.rawFiles = {} --contains each .esp file as a key (raw Records and subrecords)
-espParser.files = {} --contains each .esp file as a key
+espParser.files = {} --contains each .esp file as a key (parsed)
+--TODO have a merged one that carry over changes depending on the loadorder
 
 espParser.parseCells = function(filename) --filename already loaded in espParser.rawFiles
 	local records = espParser.getRecords(filename, "CELL")
@@ -160,6 +166,7 @@ espParser.parseCells = function(filename) --filename already loaded in espParser
 	end
 	espParser.files[filename].cells = {}
 
+	--lenghts of data types
 	local lenTable = {
 		i = 4,
 		f = 4,
@@ -167,37 +174,57 @@ espParser.parseCells = function(filename) --filename already loaded in espParser
 
 	local dataTypes = {
 		Unique = {
-			{"NAME", "s", "id"},
+			{"NAME", "s", "name"}, --cell description
 			{"DATA", {
 				{"i", "flags"},
 				{"i", "gridX"},
 				{"i", "gridY"}
 			}},
-			{"RGNN", "s", "region"},
-			{"NAM0", "i", "NAM0"},
-			{"NAM5", "i", "mapColor"},
-			{"WHGT", "f", "waterHeight"},
+			{"INTV", "i", "water"}, --water height stored in a int (didn't know about this one until I checked the openmw source, no idea why theres 2 of them)
+			{"WHGT", "f", "water"}, --water height stored in a float
 			{"AMBI", {
 				{"i", "ambientColor"},
 				{"i", "sunlightColor"},
 				{"i", "fogColor"},
 				{"f", "fogDensity"}
-			}}
+			}},
+			{"RGNN", "s", "region"}, --the region name like "Azura's Coast" used for weather and stuff
+			{"NAM5", "i", "mapColor"},
+			{"NAM0", "i", "refNumCounter"} --when you add a new object to the cell in the editor it gets this refNum then this variable is incremented 
 		},
 		Multi = {
 			{"NAME", "s", "refId"},
 			{"XSCL", "f", "scale"},
-			{"DELE", "i", "deleted"},
-			{"DNAM", "s", "doorExitName"},
-			{"FLTV", "i", "lockLevel"},
-			{"KNAM", "s", "doorKey"},
-			{"TNAM", "s", "trapName"},
+			{"DELE", "i", "deleted"}, --rip my boi
+			{"DNAM", "s", "destCell"}, --the name of the cell the door takes you too
+			{"FLTV", "i", "lockLevel"}, --door lock level
+			{"KNAM", "s", "key"}, --key refId
+			{"TNAM", "s", "trap"}, --trap spell refId
 			{"UNAM", "B", "referenceBlocked"},
-			{"ANAM", "s", "owner"},
-			{"BNAM", "s", "id"}, -- Global variable/rank ID string
-			{"INTV", "i", "uses"},
-			{"NAM9", "i", "NAM9"}, --?
-			{"XSOL", "s", "soul"}
+			{"ANAM", "s", "owner"}, --the npc owner or the item
+			{"BNAM", "s", "globalVariable"}, -- Global variable for use in scripts?
+			{"INTV", "i", "charge"}, --current charge?
+			{"NAM9", "i", "goldValue"}, --https://github.com/OpenMW/openmw/blob/dcd381049c3b7f9779c91b2f6b0f1142aff44c4a/components/esm/cellref.cpp#L163
+			{"XSOL", "s", "soul"},
+			{"CNAM", "s", "faction"}, --faction who owns the item
+			{"INDX", "i", "factionRank"}, --what rank you need to be in the faction to pick it up without stealing?
+			{"XCHG", "i", "enchantmentCharge"}, --max charge?
+			{"DODT", {
+				{"f", "XPos"},
+				{"f", "YPos"},
+				{"f", "ZPos"},
+				{"f", "XRot"},
+				{"f", "YRot"},
+				{"f", "ZRot"}
+			}, "doorDest"}, --the position the door takes you too
+			{"DATA", {
+				{"f", "XPos"},
+				{"f", "YPos"},
+				{"f", "ZPos"},
+				{"f", "XRot"},
+				{"f", "YRot"},
+				{"f", "ZRot"}
+			}, "pos"} --the position of the object
 		}
 	}
 
@@ -219,12 +246,12 @@ espParser.parseCells = function(filename) --filename already loaded in espParser
 			end
 		end
 
-		if cell.id == "" then --its a external cell
-			cell.isExternal = true
-			cell.id = cell.gridX .. ", " .. cell.gridY
+		if cell.name == "" then --its a external cell
+			cell.isExterior = true
+			cell.name = cell.gridX .. ", " .. cell.gridY
 
 		else --its a internal cell
-			cell.isExternal = false
+			cell.isExterior = false
 		end
 
 		cell.objects = {}
@@ -235,12 +262,13 @@ espParser.parseCells = function(filename) --filename already loaded in espParser
 			if subrecord.name == "FRMR" then
 				currentIndex = struct.unpack( "i", subrecord.data )
 				cell.objects[currentIndex] = {}
-				cell.objects[currentIndex].scale = 1
+				cell.objects[currentIndex].refNum = currentIndex
+				cell.objects[currentIndex].scale = 1 --just a default
 			end
 
-			if subrecord.name == "DODT" and currentIndex ~= nil then
+			--[[if subrecord.name == "DODT" and currentIndex ~= nil then
 				local stream = espParser.Stream:create( subrecord.data )
-				cell.objects[currentIndex].doorLocation = {
+				cell.objects[currentIndex].doorDest = {
 					XPos = struct.unpack( "f", stream:read(4) ),
 					YPos = struct.unpack( "f", stream:read(4) ),
 					ZPos = struct.unpack( "f", stream:read(4) ),
@@ -248,11 +276,11 @@ espParser.parseCells = function(filename) --filename already loaded in espParser
 					YRot = struct.unpack( "f", stream:read(4) ),
 					ZRot = struct.unpack( "f", stream:read(4) )
 				}
-			end
+			end]]
 
-			if subrecord.name == "DATA" and currentIndex ~= nil then
+			--[[if subrecord.name == "DATA" and currentIndex ~= nil then
 				local stream = espParser.Stream:create( subrecord.data )
-				cell.objects[currentIndex].location = {
+				cell.objects[currentIndex].pos = {
 					XPos = struct.unpack( "f", stream:read(4) ),
 					YPos = struct.unpack( "f", stream:read(4) ),
 					ZPos = struct.unpack( "f", stream:read(4) ),
@@ -260,16 +288,31 @@ espParser.parseCells = function(filename) --filename already loaded in espParser
 					YRot = struct.unpack( "f", stream:read(4) ),
 					ZRot = struct.unpack( "f", stream:read(4) )
 				}
-			end
+			end]]
 
-			for _, type in pairs(dataTypes.Multi) do
-				if subrecord.name == type[1] and currentIndex ~= nil then
-					cell.objects[currentIndex][type[3]] = struct.unpack( type[2], subrecord.data )
+			for _, dType in pairs(dataTypes.Multi) do
+				if subrecord.name == dType[1] and currentIndex ~= nil then --if its a subrecord in dataTypes.Multi
+					if type(dType[2]) == "table" then --there are several values in this data
+						local stream = espParser.Stream:create( subrecord.data )
+						for _, ddType in pairs(dType[2]) do --go thrue every value that we want out of this data
+							if dType[3] ~= nil then --store the values in a table
+								if cell.objects[currentIndex][dType[3]] == nil then
+									cell.objects[currentIndex][dType[3]] = {}
+								end
+								cell.objects[currentIndex][dType[3]][ddType[2]] = struct.unpack( ddType[1], stream:read( lenTable[ddType[1]] ) )
+								--print("cell.objects[currentIndex]" .. dType[3] .. "][" .. ddType[2] .. "]")
+							else --store the values directly in the cell
+								cell.objects[currentIndex][ddType[2]] = struct.unpack( ddType[1], lenTable[ddType[1]] )
+							end
+						end
+					else -- theres only one value in the data
+						cell.objects[currentIndex][dType[3]] = struct.unpack( dType[2], subrecord.data )
+					end
 				end
 			end
 		end
 
-		espParser.files[filename].cells[cell.id] = cell
+		espParser.files[filename].cells[cell.name] = cell
 	end
 end
 
@@ -294,7 +337,6 @@ espParser.addEsp = function(filename)
 
 	espParser.parseCells(currentFile)
 
-	--tes3mp.LogMessage(enumerations.log.INFO, "[espParser] Loaded: " .. currentFile) 
 	return true
 end
 
