@@ -266,30 +266,6 @@ espParser.parseCells = function(filename) --filename already loaded in espParser
 				cell.objects[currentIndex].scale = 1 --just a default
 			end
 
-			--[[if subrecord.name == "DODT" and currentIndex ~= nil then
-				local stream = espParser.Stream:create( subrecord.data )
-				cell.objects[currentIndex].doorDest = {
-					XPos = struct.unpack( "f", stream:read(4) ),
-					YPos = struct.unpack( "f", stream:read(4) ),
-					ZPos = struct.unpack( "f", stream:read(4) ),
-					XRot = struct.unpack( "f", stream:read(4) ),
-					YRot = struct.unpack( "f", stream:read(4) ),
-					ZRot = struct.unpack( "f", stream:read(4) )
-				}
-			end]]
-
-			--[[if subrecord.name == "DATA" and currentIndex ~= nil then
-				local stream = espParser.Stream:create( subrecord.data )
-				cell.objects[currentIndex].pos = {
-					XPos = struct.unpack( "f", stream:read(4) ),
-					YPos = struct.unpack( "f", stream:read(4) ),
-					ZPos = struct.unpack( "f", stream:read(4) ),
-					XRot = struct.unpack( "f", stream:read(4) ),
-					YRot = struct.unpack( "f", stream:read(4) ),
-					ZRot = struct.unpack( "f", stream:read(4) )
-				}
-			end]]
-
 			for _, dType in pairs(dataTypes.Multi) do
 				if subrecord.name == dType[1] and currentIndex ~= nil then --if its a subrecord in dataTypes.Multi
 					if type(dType[2]) == "table" then --there are several values in this data
@@ -314,6 +290,24 @@ espParser.parseCells = function(filename) --filename already loaded in espParser
 
 		espParser.files[filename].cells[cell.name] = cell
 	end
+end
+
+espParser.parseStatics = function(filename)
+	local records = espParser.getRecords(filename, "STAT")
+
+	if espParser.files[filename] == nil then
+		espParser.files[filename] = {}
+	end
+	espParser.files[filename].statics = {}
+
+	for _, record in pairs(records) do
+		local refId = struct.unpack( "s", record:getSubRecordsByName("NAME")[1].data )
+		local model = struct.unpack( "s", record:getSubRecordsByName("MODL")[1].data )
+		espParser.files[filename].statics[refId] = {}
+		espParser.files[filename].statics[refId].refId = refId
+		espParser.files[filename].statics[refId].model = model
+	end
+
 end
 
 espParser.addEsp = function(filename)
