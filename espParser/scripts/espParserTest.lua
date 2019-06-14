@@ -8,13 +8,25 @@ doInfo("Start")
 
 -- new cells
 
+for _, file in pairs(espParser.files) do
+	for cellName, cell in pairs(file.cells) do
+		doInfo(cellName)
+		for _, obj in pairs(cell.objects) do
+			doInfo(obj.pos.XPos)
+		end
+	end
+end
+
+--[[
+
 for _, cell in pairs(espParser.files["Tribunal.esm"].cells) do
 	doInfo(cell.name)
 	for key, obj in pairs(cell.objects) do
-		for n,m in pairs(obj) do
-			doInfo("    " .. n .. ": " .. tostring(m))
-		end
-		doInfo("")
+		doInfo(obj.pos.XPos)
+		--for n,m in pairs(obj) do
+		--	doInfo("    " .. n .. ": " .. tostring(m))
+		--end
+		--doInfo("")
 		--doInfo(key .. ": " .. obj.refId .. " " .. obj.scale)
 		--doInfo("    " .. obj.pos.XPos)
 	end
@@ -25,7 +37,7 @@ for _, cell in pairs(espParser.files["Tribunal.esm"].cells) do
 	--end
 end
 
-
+]]
 
 -- figure out spell ids
 --[[
