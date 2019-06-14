@@ -9,8 +9,14 @@ doInfo("Start")
 -- new cells
 
 for _, cell in pairs(espParser.files["Tribunal.esm"].cells) do
+	doInfo(cell.name)
 	for key, obj in pairs(cell.objects) do
-		doInfo(key .. ": " .. obj.refId .. " " .. obj.scale)
+		for n,m in pairs(obj) do
+			doInfo("    " .. n .. ": " .. tostring(m))
+		end
+		doInfo("")
+		--doInfo(key .. ": " .. obj.refId .. " " .. obj.scale)
+		--doInfo("    " .. obj.pos.XPos)
 	end
 	break
 	--doInfo(cell.id)
