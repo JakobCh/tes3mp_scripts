@@ -6,16 +6,32 @@ end
 
 doInfo("Start")
 
--- new cells
+for _, misc in pairs(espParser.files["Tribunal.esm"].miscs) do
+	for n,m in pairs(misc) do
+		doInfo("    " .. n .. ": " .. tostring(m))
+	end
+end
 
+
+--[[
+for fileName, file in pairs(espParser.files) do
+	for refId, static in pairs(file.statics) do
+		doInfo(static.refId .. ": " .. static.model)
+	end
+end
+]]
+
+-- new cells
+--[[
 for _, file in pairs(espParser.files) do
 	for cellName, cell in pairs(file.cells) do
 		doInfo(cellName)
-		for _, obj in pairs(cell.objects) do
-			doInfo(obj.pos.XPos)
-		end
+		--for _, obj in pairs(cell.objects) do
+		--	doInfo(obj.pos.XPos)
+		--end
 	end
 end
+]]
 
 --[[
 
