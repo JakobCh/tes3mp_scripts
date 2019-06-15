@@ -158,6 +158,27 @@ espParser.rawFiles = {} --contains each .esp file as a key (raw Records and subr
 espParser.files = {} --contains each .esp file as a key (parsed)
 --TODO have a merged one that carry over changes depending on the loadorder
 
+espParser.subrecordParseHelper = function(obj, dataTypes, subrecord)
+	if dataTypes[subrecord.name] ~= nil then
+		if type(dataTypes[subrecord.name][1]) == "table" then
+			local stream = espParser.Stream:create( subrecord.data )
+			for _, ty in pairs(dataTypes[subrecord.name][1]) do
+				if dataTypes[subrecord.name][2] == nil then --assign directly to the object
+					obj[ ty[2] ] = struct.unpack( ty[1], stream:read(4) )
+				else --put the values in a table
+					if obj[ dataTypes[subrecord.name][2] ] == nil then
+						obj[ dataTypes[subrecord.name][2] ] = {}
+					end
+					obj[ dataTypes[subrecord.name][2] ][ ty[2] ] = struct.unpack( ty[1], stream:read(4) )
+				end
+			end
+		else
+			obj[ dataTypes[subrecord.name][2] ] = struct.unpack( dataTypes[subrecord.name][1], subrecord.data )
+		end
+	end
+	return obj
+end
+
 espParser.parseCells = function(filename) --filename already loaded in espParser.rawFiles
 	local records = espParser.getRecords(filename, "CELL")
 
@@ -310,6 +331,45 @@ espParser.parseStatics = function(filename)
 
 end
 
+espParser.parseMiscs = function(filename)
+	local records = espParser.getRecords(filename, "MISC")
+
+	if espParser.files[filename] == nil then
+		espParser.files[filename] = {}
+	end
+	espParser.files[filename].miscs = {}
+
+	local dataTypes = {
+		NAME = {"s", "refId"},
+		MODL = {"s", "model"},
+		FNAM = {"s", "name"},
+		MCDT = {
+			{
+				{"f", "weight"},
+				{"i", "value"},
+				{"i", "unknown"}
+			}
+		},
+		SCRI = {"s", "script"},
+		ITEX = {"s", "icon"},
+		DELE = {"i", "deleted"}
+	}
+
+
+	for _, record in pairs(records) do
+		local refId = struct.unpack( "s", record:getSubRecordsByName("NAME")[1].data )
+		espParser.files[filename].miscs[refId] = {}
+
+		for _, subrecord in pairs(record.subRecords) do
+			espParser.files[filename].miscs[refId] = espParser.subrecordParseHelper(espParser.files[filename].miscs[refId], dataTypes, subrecord)
+		end
+
+	end
+
+end
+
+
+
 espParser.addEsp = function(filename)
 	local currentFile = filename
 	
@@ -330,6 +390,8 @@ espParser.addEsp = function(filename)
 	end
 
 	espParser.parseCells(currentFile)
+	espParser.parseStatics(currentFile)
+	espParser.parseMiscs(currentFile)
 
 	return true
 end
