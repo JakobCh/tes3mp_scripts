@@ -267,10 +267,9 @@ espParser.parseCells = function(filename) --filename already loaded in espParser
 			end
 		end
 
-		if cell.name == "" then --its a external cell
+		if cell.region ~= nil or cell.name == "" then --its a external cell
 			cell.isExterior = true
 			cell.name = cell.gridX .. ", " .. cell.gridY
-
 		else --its a internal cell
 			cell.isExterior = false
 		end
