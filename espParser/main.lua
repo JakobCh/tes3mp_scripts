@@ -1,37 +1,15 @@
---[[
-	espParser 0.5
-	By Jakob https://github.com/JakobCh
-	Mostly using: https://en.uesp.net/morrow/tech/mw_esm.txt
-	
-	Updates will probably break your shit right now in the early stages.
-
-	Almost all record/subrecord data isn't parsed.
-
-	Things that are currently parsed:
-		Cells - espParser.files["Morrowind.esm"].cells
-	
-	Installation:
-		1. Put this file and struct.lua ( https://github.com/iryont/lua-struct ) in /server/scripts/custom/
-		2. Add "require("custom.espParser")" to /server/scripts/customScripts.lua
-		3. Create a folder called "esps" in /server/data/custom/
-		4. Place your esp/esm files in the new folder (/server/data/custom/esps/)
-		5. Change the "files" table a couple lines down to match your files
-		(6. Check the espParserTest.lua file for examples)
-	
-]]
-
-local files = {
-	"Morrowind.esm",
-	"Tribunal.esm",
-	"Bloodmoon.esm"
-}
-
 require "custom.struct" -- Requires https://github.com/iryont/lua-struct
 
---Global
 espParser = {}
 
---print(debug.getinfo(2, "S").source:sub(2))
+espParser.scriptName = "espParser"
+espParser.initialConfig = require("custom.espParser.initialConfig")
+espParser.config = DataManager.loadConfiguration(
+    espParser.scriptName,
+    espParser.initialConfig.values,
+    espParser.initialConfig.keyOrder
+)
+espParser.loaded = false
 
 --Stream class
 espParser.Stream = {}
@@ -96,7 +74,6 @@ function espParser.SubRecord:create(stream)
 	newobj.name = stream:read(4)
 	newobj.size = struct.unpack( "i", stream:read(4) )
 	newobj.data = stream:read(newobj.size)
-	--print("Creating subrecord with name: " .. tostring(newobj.name))
 	return newobj
 end
 
@@ -127,8 +104,8 @@ end
 
 espParser.getAllRecords = function(recordName)
 	local out = {}
-	for filename,records in pairs(espParser.files) do
-		for _,record in pairs(records) do
+	for filename,records in pairs(espParser.rawFiles) do
+        for _,record in pairs(records) do
 			if record.name == recordName then
 				table.insert(out, record)
 			end
@@ -139,7 +116,7 @@ end
 
 espParser.getAllSubRecords = function(recordName, subRecordName)
 	local out = {}
-	for filename,records in pairs(espParser.files) do
+	for filename,records in pairs(espParser.rawFiles) do
 		for _,record in pairs(records) do
 			if record.name == recordName then
 				for _, subrecord in pairs(record.subRecords) do
@@ -151,6 +128,36 @@ espParser.getAllSubRecords = function(recordName, subRecordName)
 		end
 	end
 	return out
+end
+
+local structTypes = {
+    b = 1, --signed char
+    B = 1, --unsigned char
+    h = 2, --unsigned short
+    H = 2, --unsigned short
+    i = 4, --signed int
+    I = 4, --unsigned int
+    l = 8, --signed long
+    L = 8, --unsigned long
+    f = 4, --float
+    d = 8, --double
+    s = -1, --zero-terminated string
+    cn = -1 --sequence of exactly n chars corresponding to a single Lua string
+}
+
+espParser.getValue = function(subRecord, type, position, length)
+    local size = structTypes[type]
+    if size == nil then
+        return nil
+    end
+
+    if size ~= -1 then
+        return struct.unpack( type, string.sub(subRecord.data, position, position + size - 1) )
+    elseif length ~= nil then
+        return struct.unpack( type, string.sub(subRecord.data, position, position + length - 1) )
+    else
+        return struct.unpack( type, string.sub(subRecord.data, position) )
+    end
 end
 
 
@@ -261,7 +268,6 @@ espParser.parseCells = function(filename) --filename already loaded in espParser
 						cell[ddType[2]] = struct.unpack( ddType[1], stream:read(4) )
 					end
 				else
-					--print(dType[2], tempData.data)
 					cell[dType[3]] = struct.unpack( dType[2], tempData.data )
 				end
 			end
@@ -296,7 +302,6 @@ espParser.parseCells = function(filename) --filename already loaded in espParser
 									cell.objects[currentIndex][dType[3]] = {}
 								end
 								cell.objects[currentIndex][dType[3]][ddType[2]] = struct.unpack( ddType[1], stream:read( lenTable[ddType[1]] ) )
-								--print("cell.objects[currentIndex]" .. dType[3] .. "][" .. ddType[2] .. "]")
 							else --store the values directly in the cell
 								cell.objects[currentIndex][ddType[2]] = struct.unpack( ddType[1], lenTable[ddType[1]] )
 							end
@@ -368,16 +373,14 @@ espParser.parseMiscs = function(filename)
 end
 
 
+-- Loading files
 
-espParser.addEsp = function(filename)
+espParser.addEsp = function(path, filename)
 	local currentFile = filename
-	
-	--print(tes3mp.GetDataPath() .. "\\custom\\esps\\" .. currentFile)
-	local f
-	f = io.open(tes3mp.GetDataPath() .. "\\custom\\esps\\" .. currentFile, "rb") --open file handler (windows)
-	if f == nil then
-		f = io.open(tes3mp.GetDataPath() .. "/custom/esps/" .. currentFile, "rb") --open file handler (linux)
-	end
+    
+    local fullPath = tes3mp.GetDataPath() .. "/" .. path .. currentFile
+    fullPath = fullPath:gsub("\\", "/")
+	local f = io.open(fullPath, "rb")
 
 	if f == nil then return false end --could not open the file
 	
@@ -395,17 +398,46 @@ espParser.addEsp = function(filename)
 	return true
 end
 
--- Load all the files in the config
-tes3mp.LogMessage(enumerations.log.INFO, "[espParser] Loading files...") 
-for i,name in pairs(files) do
-	if espParser.addEsp(name) then
-		tes3mp.LogMessage(enumerations.log.INFO, "[espParser] Loaded: " .. name) 
-	else
-		tes3mp.LogMessage(enumerations.log.INFO, "[espParser] Failed to load: " .. name) 
-	end
+espParser.loadFiles = function()
+    local files
+    if espParser.config.requiredDataFiles then
+        files = jsonInterface.load("requiredDataFiles.json")
+    else
+        files = espParser.config.files
+    end
+
+
+    tes3mp.LogMessage(enumerations.log.INFO, "[espParser] Loading files...") 
+    local fileCount = #files
+    for i = 1, fileCount do
+        for file, _ in pairs(files[i]) do
+            if espParser.addEsp(espParser.config.espPath, file) then
+                tes3mp.LogMessage(enumerations.log.INFO, "[espParser] Loaded: " .. file) 
+            else
+                tes3mp.LogMessage(enumerations.log.INFO, "[espParser] Failed to load: " .. file) 
+            end
+        end
+    end
+    espParser.loaded = true
+    tes3mp.LogMessage(enumerations.log.INFO, "[espParser] Finished!")
 end
-tes3mp.LogMessage(enumerations.log.INFO, "[espParser] Finished!") 
+
+espParser.unloadFiles = function()
+    espParser.files = {}
+    espParser.rawFiles = {}
+    espParser.loaded = false
+    tes3mp.LogMessage(enumerations.log.INFO, "[espParser] Unloaded all files!")
+end
+
+espParser.isLoaded = function()
+    return espParser.loaded
+end
 
 
+-- Event hooks
 
-
+customEventHooks.registerHandler("OnServerPostInit", function()
+    if espParser.config.preload then
+        espParser.loadFiles()
+    end
+end)
