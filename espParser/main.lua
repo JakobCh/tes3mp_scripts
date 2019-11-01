@@ -145,18 +145,18 @@ local structTypes = {
     cn = -1 --sequence of exactly n chars corresponding to a single Lua string
 }
 
-espParser.getValue = function(subRecord, type, position, length)
+espParser.getValue = function(data, type, position, length)
     local size = structTypes[type]
     if size == nil then
         return nil
     end
 
     if size ~= -1 then
-        return struct.unpack( type, string.sub(subRecord.data, position, position + size - 1) )
+        return struct.unpack( type, string.sub(data, position, position + size - 1) )
     elseif length ~= nil then
-        return struct.unpack( type, string.sub(subRecord.data, position, position + length - 1) )
+        return struct.unpack( type, string.sub(data, position, position + length - 1) )
     else
-        return struct.unpack( type, string.sub(subRecord.data, position) )
+        return struct.unpack( type, string.sub(data, position) )
     end
 end
 
