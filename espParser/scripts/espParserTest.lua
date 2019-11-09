@@ -13,6 +13,26 @@ for _, misc in pairs(espParser.files["Tribunal.esm"].miscs) do
 end
 
 
+require "custom.struct"
+
+local outTable = {}
+
+for _,record in pairs(espParser.getAllRecords("ALCH")) do
+    local name = ""
+    local refId = ""
+    for _, subrecord in pairs(record.subRecords) do
+        if subrecord.name == "NAME" do
+            refId = struct.unpack("s", subrecord.data)
+        elseif subrecord.name == "FNAM" do
+            name = struct.unpack("s", subrecord.data)
+            outTable[refId] = name
+            tes3mp.LogMessage(enumerations.log.INFO, refId .. " = " .. name)
+        end
+    end
+end
+
+
+
 --[[
 for fileName, file in pairs(espParser.files) do
 	for refId, static in pairs(file.statics) do
