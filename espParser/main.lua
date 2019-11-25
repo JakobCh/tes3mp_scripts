@@ -133,7 +133,8 @@ espParser.getSubRecordsByName = function(filename, recordName, subrecordName)
 	return output
 end
 
-espParser.getAllRecords = function()
+--dont call this bro
+--[[espParser.getAllRecords = function()
 	local files
     if espParser.config.requiredDataFiles then
         files = jsonInterface.load("requiredDataFiles.json")
@@ -149,14 +150,21 @@ espParser.getAllRecords = function()
         end
 	end
 	return output
-end
+end]]--
 
 espParser.getAllRecordsByName = function(recordName)
-	local files = espParser.getAllRecords()
+	local files
+    if espParser.config.requiredDataFiles then
+        files = jsonInterface.load("requiredDataFiles.json")
+    else
+        files = espParser.config.files
+    end
+
 	local output = {}
 	for fileName, file in pairs(files) do
 		output[fileName] = {}
-		for _,record in pairs(file) do
+		local records = espParser.getRecords(file)
+		for _,record in pairs(records) do
 			if record.name == recordName then
 				table.insert(output[fileName], record)
 			end
