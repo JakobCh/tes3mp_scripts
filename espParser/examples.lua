@@ -1,11 +1,27 @@
 
 
 local doInfo = function(text)
-	tes3mp.LogMessage(enumerations.log.INFO, "[espParserTest] " .. text) 
+	tes3mp.LogMessage(enumerations.log.INFO, "[espParserTest] " .. tostring(text)) 
 end
 
 doInfo("Start")
 
+
+espParser.getRecords("Morrowind.esm")
+espParser.getRecords("Morrowind.esm")
+espParser.getRecords("Morrowind.esm")
+espParser.clearCache()
+espParser.getRecords("Morrowind.esm")
+espParser.getRecords("Morrowind.esm")
+
+
+--for x,_ in pairs(espParser.getAllRecordsByName("GLOB")) do
+--	doInfo(x)
+--end
+
+
+
+--[[
 for _, misc in pairs(espParser.files["Tribunal.esm"].miscs) do
 	for n,m in pairs(misc) do
 		doInfo("    " .. n .. ": " .. tostring(m))
@@ -30,7 +46,7 @@ for _,record in pairs(espParser.getAllRecords("ALCH")) do
         end
     end
 end
-
+]]--
 
 
 --[[

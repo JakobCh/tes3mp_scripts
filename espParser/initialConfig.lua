@@ -1,5 +1,6 @@
 local keyOrder = {
     "espPath",
+    "cache",
     "preload",
     "useRequiredDataFiles",
     "requiredDataFiles",
@@ -8,7 +9,8 @@ local keyOrder = {
 
 local values = {
     espPath = "custom/esps/",
-    preload = true,
+    cache = false,
+    preload = false,
     useRequiredDataFiles = true,
     requiredDataFiles = "requiredDataFiles.json",
     files = {},

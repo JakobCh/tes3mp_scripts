@@ -1,4 +1,4 @@
-espParser 0.5.1
+espParser 0.6
 ---
 By Jakob https://github.com/JakobCh
 Mostly using: https://en.uesp.net/morrow/tech/mw_esm.txt
@@ -6,6 +6,8 @@ Mostly using: https://en.uesp.net/morrow/tech/mw_esm.txt
 Updates will probably break your shit right now in the early stages.
 
 Almost all record/subrecord data isn't parsed.
+
+Needs DataManager.
 
 Installation:
 ---
@@ -18,6 +20,7 @@ Installation:
 Config:
 ---
 * `espPath` path to the esp folder inside `server/data`. Default value: `custom/esps`
+* `cache` if we should cache loaded files in memory
 * `preload` whether all esps should be loaded on startup. Default value: `false`
 * `useRequiredDataFiles` whether espParser should use `requiredDataFiles.json` for the load order. Default value: `true`
 * `requiredDataFiles` path to `requiredDataFiles.json` inside data (or another file if you wish). Default value: `requiredDataFiles.json`

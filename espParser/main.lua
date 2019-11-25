@@ -10,6 +10,8 @@ espParser.config = DataManager.loadConfiguration(
     espParser.initialConfig.keyOrder
 )
 espParser.loaded = false
+espParser.cached = {} --store cached records from files
+--TODO have a merged one that carry over changes depending on the loadorder
 
 --Stream class
 espParser.Stream = {}
@@ -77,59 +79,113 @@ function espParser.SubRecord:create(stream)
 	return newobj
 end
 
---helper functions
-espParser.getRecords = function(filename, recordName)
-	local out = {}
-	for i,record in pairs(espParser.rawFiles[filename]) do
+--Global Functions
+
+
+espParser.getRecords = function(filename) --returns a array of records from the specified esp/esm file
+
+	if espParser.cached[filename] then
+		tes3mp.LogMessage(enumerations.log.INFO, "[espParser] Loaded: " .. filename .. " from cache")
+		return espParser.cached[filename]
+	end
+
+	local fullPath = tes3mp.GetDataPath() .. "/" .. espParser.config.espPath .. filename
+	fullPath = fullPath:gsub("\\", "/")
+	local f = io.open(fullPath, "rb")
+
+	if f == nil then return false end --could not open the file
+	
+	local mainStream = espParser.Stream:create(f:read("*a")) --read all
+
+	local output = {}
+	while mainStream.pointer < mainStream:len() do
+		local r = espParser.Record:create(mainStream)
+		table.insert(output, r)
+	end
+
+	if espParser.config.cache then
+		espParser.cached[filename] = output
+	end
+	tes3mp.LogMessage(enumerations.log.INFO, "[espParser] Loaded: " .. filename)
+	return output
+end
+
+espParser.getRecordsByName = function(filename, recordName) --returns a array of records from the specified esp/esm file
+	local records = espParser.getRecords(filename)
+	local output = {}
+
+	for i,record in pairs(records) do
 		if record.name == recordName then
-			table.insert(out, record)
+			table.insert(output, record)
 		end
 	end
-	return out
+	return output
 end
 
-espParser.getSubRecords = function(filename, recordName, subRecordName)
-	local out = {}
-	for _,record in pairs(espParser.rawFiles[filename]) do
-		if record.name == recordName then
-			for _, subrecord in pairs(record.subRecords) do
-				if subrecord.name == subRecordName then
-					table.insert(out, subrecord)
-				end
-			end
+espParser.getSubRecordsByName = function(filename, recordName, subrecordName)
+	local records = espParser.getRecords(filename, recordName)
+	local output = {}
+	for _,record in pairs(records) do
+		for _,subrecord in pairs(record.subRecords) do
+			table.insert(output, subrecord)
 		end
 	end
-	return out
+	return output
 end
 
-espParser.getAllRecords = function(recordName)
-	local out = {}
-	for filename,records in pairs(espParser.rawFiles) do
-        for _,record in pairs(records) do
+espParser.getAllRecords = function()
+	local files
+    if espParser.config.requiredDataFiles then
+        files = jsonInterface.load("requiredDataFiles.json")
+    else
+        files = espParser.config.files
+    end
+
+	local output = {}
+
+    for i = 1, #files do
+		for file, _ in pairs(files[i]) do
+			output[file] = espParser.getRecords(file)
+        end
+	end
+	return output
+end
+
+espParser.getAllRecordsByName = function(recordName)
+	local files = espParser.getAllRecords()
+	local output = {}
+	for fileName, file in pairs(files) do
+		output[fileName] = {}
+		for _,record in pairs(file) do
 			if record.name == recordName then
-				table.insert(out, record)
+				table.insert(output[fileName], record)
 			end
 		end
 	end
-	return out
+	return output
 end
 
-espParser.getAllSubRecords = function(recordName, subRecordName)
-	local out = {}
-	for filename,records in pairs(espParser.rawFiles) do
-		for _,record in pairs(records) do
-			if record.name == recordName then
-				for _, subrecord in pairs(record.subRecords) do
-					if subrecord.name == subRecordName then
-						table.insert(out, subrecord)
-					end
-				end
+
+espParser.getAllSubRecordsByName = function(recordName, subrecordName)
+	local files = espParser.getAllRecordsByName(recordName)
+	local output = {}
+	for fileName, file in pairs(files) do
+		output[fileName] = {}
+		for _,record in pairs(file) do
+			for _,subrecord in pairs(record.subRecords) do
+				table.insert(output[fileName], subrecord)
 			end
 		end
 	end
-	return out
+	return output
 end
 
+espParser.clearCache = function()
+    espParser.cached = {}
+    tes3mp.LogMessage(enumerations.log.INFO, "[espParser] Cleared Cache!")
+end
+
+-----NOT USED RN
 local structTypes = {
     b = 1, --signed char
     B = 1, --unsigned char
@@ -159,11 +215,6 @@ espParser.getValue = function(data, type, position, length)
         return struct.unpack( type, string.sub(data, position) )
     end
 end
-
-
-espParser.rawFiles = {} --contains each .esp file as a key (raw Records and subrecords)
-espParser.files = {} --contains each .esp file as a key (parsed)
---TODO have a merged one that carry over changes depending on the loadorder
 
 espParser.subrecordParseHelper = function(obj, dataTypes, subrecord)
 	if dataTypes[subrecord.name] ~= nil then
@@ -373,71 +424,11 @@ espParser.parseMiscs = function(filename)
 end
 
 
--- Loading files
-
-espParser.addEsp = function(path, filename)
-	local currentFile = filename
-    
-    local fullPath = tes3mp.GetDataPath() .. "/" .. path .. currentFile
-    fullPath = fullPath:gsub("\\", "/")
-	local f = io.open(fullPath, "rb")
-
-	if f == nil then return false end --could not open the file
-	
-	local mainStream = espParser.Stream:create(f:read("*a")) --read all
-	espParser.rawFiles[currentFile] = {}
-	while mainStream.pointer < mainStream:len() do
-		local r = espParser.Record:create(mainStream)
-		table.insert(espParser.rawFiles[currentFile], r)
-	end
-
-	espParser.parseCells(currentFile)
-	espParser.parseStatics(currentFile)
-	espParser.parseMiscs(currentFile)
-
-	return true
-end
-
-espParser.loadFiles = function()
-    local files
-    if espParser.config.requiredDataFiles then
-        files = jsonInterface.load("requiredDataFiles.json")
-    else
-        files = espParser.config.files
-    end
-
-
-    tes3mp.LogMessage(enumerations.log.INFO, "[espParser] Loading files...") 
-    local fileCount = #files
-    for i = 1, fileCount do
-        for file, _ in pairs(files[i]) do
-            if espParser.addEsp(espParser.config.espPath, file) then
-                tes3mp.LogMessage(enumerations.log.INFO, "[espParser] Loaded: " .. file) 
-            else
-                tes3mp.LogMessage(enumerations.log.INFO, "[espParser] Failed to load: " .. file) 
-            end
-        end
-    end
-    espParser.loaded = true
-    tes3mp.LogMessage(enumerations.log.INFO, "[espParser] Finished!")
-end
-
-espParser.unloadFiles = function()
-    espParser.files = {}
-    espParser.rawFiles = {}
-    espParser.loaded = false
-    tes3mp.LogMessage(enumerations.log.INFO, "[espParser] Unloaded all files!")
-end
-
-espParser.isLoaded = function()
-    return espParser.loaded
-end
-
-
 -- Event hooks
-
 customEventHooks.registerHandler("OnServerPostInit", function()
+	tes3mp.LogMessage(enumerations.log.INFO, "[espParser] Loaded")
     if espParser.config.preload then
-        espParser.loadFiles()
+		espParser.getAllRecords()
+		tes3mp.LogMessage(enumerations.log.INFO, "[espParser] Preloaded all files!")
     end
 end)
