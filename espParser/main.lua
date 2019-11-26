@@ -334,10 +334,10 @@ espParser.parseCells = function(filename) --filename already loaded in espParser
 				if type(dType[2]) == "table" then
 					local stream = espParser.Stream:create( tempData.data )
 					for _, ddType in pairs(dType[2]) do
-						cell[ddType[2]] = struct.unpack( ddType[1], stream:read(4) )
+						cell[ ddType[2] ] = struct.unpack( ddType[1], stream:read(4) )
 					end
 				else
-					cell[dType[3]] = struct.unpack( dType[2], tempData.data )
+					cell[ dType[3] ] = struct.unpack( dType[2], tempData.data )
 				end
 			end
 		end
@@ -367,16 +367,16 @@ espParser.parseCells = function(filename) --filename already loaded in espParser
 						local stream = espParser.Stream:create( subrecord.data )
 						for _, ddType in pairs(dType[2]) do --go thrue every value that we want out of this data
 							if dType[3] ~= nil then --store the values in a table
-								if cell.objects[currentIndex][dType[3]] == nil then
-									cell.objects[currentIndex][dType[3]] = {}
+								if cell.objects[currentIndex][ dType[3] ] == nil then
+									cell.objects[currentIndex][ dType[3] ] = {}
 								end
-								cell.objects[currentIndex][dType[3]][ddType[2]] = struct.unpack( ddType[1], stream:read( lenTable[ddType[1]] ) )
+								cell.objects[currentIndex][ dType[3] ][ ddType[2] ] = struct.unpack( ddType[1], stream:read( lenTable[ ddType[1] ] ) )
 							else --store the values directly in the cell
-								cell.objects[currentIndex][ddType[2]] = struct.unpack( ddType[1], lenTable[ddType[1]] )
+								cell.objects[currentIndex][ ddType[2] ] = struct.unpack( ddType[1], lenTable[ ddType[1] ] )
 							end
 						end
 					else -- theres only one value in the data
-						cell.objects[currentIndex][dType[3]] = struct.unpack( dType[2], subrecord.data )
+						cell.objects[currentIndex][ dType[3] ] = struct.unpack( dType[2], subrecord.data )
 					end
 				end
 			end
