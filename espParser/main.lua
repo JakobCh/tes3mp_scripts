@@ -193,7 +193,17 @@ espParser.clearCache = function()
     tes3mp.LogMessage(enumerations.log.INFO, "[espParser] Cleared Cache!")
 end
 
+-- Event hooks
+customEventHooks.registerHandler("OnServerPostInit", function()
+	tes3mp.LogMessage(enumerations.log.INFO, "[espParser] Loaded")
+    if espParser.config.preload then
+		espParser.getAllRecords()
+		tes3mp.LogMessage(enumerations.log.INFO, "[espParser] Preloaded all files!")
+    end
+end)
+
 -----NOT USED RN
+--[[
 local structTypes = {
     b = 1, --signed char
     B = 1, --unsigned char
@@ -430,13 +440,6 @@ espParser.parseMiscs = function(filename)
 	end
 
 end
+]]--
 
 
--- Event hooks
-customEventHooks.registerHandler("OnServerPostInit", function()
-	tes3mp.LogMessage(enumerations.log.INFO, "[espParser] Loaded")
-    if espParser.config.preload then
-		espParser.getAllRecords()
-		tes3mp.LogMessage(enumerations.log.INFO, "[espParser] Preloaded all files!")
-    end
-end)
