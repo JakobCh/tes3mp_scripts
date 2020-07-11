@@ -16,10 +16,10 @@ customEventHooks.registerValidator("OnPlayerSkill", function(eventStatus, pid)
 
     for name in pairs(player.data.skills) do
         local skillId = tes3mp.GetSkillId(name)
-        local baseValue = tes3mp.GetSkillBase(self.pid, skillId)
+        local baseValue = tes3mp.GetSkillBase(pid, skillId)
 
         if baseValue < player.data.skills[name].base then
-            tes3mp.LogAppend(enumerations.log.INFO, "Player " .. logicHandler.GetChatName(self.pid) ..
+            tes3mp.LogAppend(enumerations.log.INFO, "Player " .. logicHandler.GetChatName(pid) ..
                                                     " has a lower local skill in " .. name ..
                                                     " then the server has stored.")
             self:LoadSkills() --Send the client the servers skills
