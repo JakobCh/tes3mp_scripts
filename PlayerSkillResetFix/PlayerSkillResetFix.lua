@@ -7,8 +7,8 @@
 -- This causes the client to use the default skills of a new character, that it will try to update the server with later.
 
 -- To install:
--- 	Put this fine in scripts/custom/
--- 	open up scripts/customscripts.lua and add "require("custom.PlayerSkillResetFix")"
+--     Put this fine in scripts/custom/
+--     open up scripts/customscripts.lua and add "require("custom.PlayerSkillResetFix")"
 
 --This will override the normal BasePlayer:SaveSkills function
 function BasePlayer:SaveSkills()
@@ -37,13 +37,13 @@ function BasePlayer:SaveSkills()
 
             local message = "Your " .. name .. " fortification has exceeded the maximum allowed " ..
                 "value and been removed.\n"
-			tes3mp.SendMessage(self.pid, message)
-			
-		elseif baseValue < self.data.skills[name].base then --if the client sends a lower value then the server already has
-			tes3mp.LogAppend(enumerations.log.INFO, "Player " .. logicHandler.GetChatName(self.pid) ..
-													" has a lower local skill in " .. name ..
-													" then the server has stored.")
-			self:LoadSkills() --Send the client the servers skills
+            tes3mp.SendMessage(self.pid, message)
+            
+        elseif baseValue < self.data.skills[name].base then --if the client sends a lower value then the server already has
+            tes3mp.LogAppend(enumerations.log.INFO, "Player " .. logicHandler.GetChatName(self.pid) ..
+                                                    " has a lower local skill in " .. name ..
+                                                    " then the server has stored.")
+            self:LoadSkills() --Send the client the servers skills
         else
             self.data.skills[name] = {
                 base = baseValue,
