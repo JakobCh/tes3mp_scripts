@@ -25,7 +25,6 @@ customEventHooks.registerValidator("OnPlayerSkill", function(eventStatus, pid)
                                                     " then the server has stored.")
             self:LoadSkills() --Send the client the servers skills
             return customEventHooks.makeEventStatus(false,false)
-            break
         end
     end
 
