@@ -10,6 +10,7 @@
 --     open up scripts/customscripts.lua and add "require("custom.PlayerSkillResetFix")"
 
 
+
 customEventHooks.registerValidator("OnPlayerSkill", function(eventStatus, pid)
 
     local player = Players[pid]
@@ -23,7 +24,7 @@ customEventHooks.registerValidator("OnPlayerSkill", function(eventStatus, pid)
                                                     " has a lower local skill in " .. name ..
                                                     " then the server has stored.")
             self:LoadSkills() --Send the client the servers skills
-            eventStatus.validDefaultHandler = false
+            return customEventHooks.makeEventStatus(false,false)
             break
         end
     end
