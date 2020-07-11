@@ -112,7 +112,10 @@ JCMining_TimerFunc = function()
 			JCMining.delMinerPid(pid)
 		else
 			local itemRefId = JCMining.typeToItem[info.type]
-			msg(pid, color.Green .. "You mined some " .. itemRefId .. "!")
+			--msg(pid, color.Green .. "You mined some " .. itemRefId .. "!")
+			--tes3mp.PlayAnimation(pid, "Slash Start", 0, 1, false) --TODO
+			tes3mp.MessageBox(pid, -1, "You mine some " .. info.type .. ".")
+			logicHandler.RunConsoleCommandOnPlayer(pid, "PlaySound Repair", false)
 			inventoryHelper.addItem(Players[pid].data.inventory, itemRefId, 1, -1, -1, -1)
 			Players[pid]:LoadInventory()
 			Players[pid]:LoadEquipment()
@@ -133,7 +136,7 @@ customEventHooks.registerValidator("OnObjectActivate", function(eventStatus, pid
 				JCMining.addOre(refId, object.uniqueIndex, cellDescription)
 				if JCMining.canMineOre(object.uniqueIndex, cellDescription) then
 					JCMining.addMiner(object.activatingPid, t, object.uniqueIndex, cellDescription)
-					msg(object.activatingPid, "You start mining some " .. t .. "!")
+					msg(object.activatingPid, color.Green .. "You start mining some " .. t .. "!")
 				else
 					msg(object.activatingPid, color.Red .. "That vain is empty.")
 				end
