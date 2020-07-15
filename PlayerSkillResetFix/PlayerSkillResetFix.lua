@@ -5,6 +5,8 @@
 -- This is cause by packet loss to the client when they log in so they never get there skills from the server.
 -- This causes the client to use the default skills of a new character, that it will try to update the server with later.
 
+-- THIS WILL NOT WORK WITH THE DEFAULT RESPAWN MECHANIC THAT LOWERS YOUR SKILLS
+
 -- To install:
 --     Put this fine in scripts/custom/
 --     open up scripts/customscripts.lua and add "require("custom.PlayerSkillResetFix")"
@@ -20,10 +22,10 @@ customEventHooks.registerValidator("OnPlayerSkill", function(eventStatus, pid)
         local baseValue = tes3mp.GetSkillBase(pid, skillId)
 
         if baseValue < player.data.skills[name].base then
-            tes3mp.LogAppend(enumerations.log.INFO, "Player " .. logicHandler.GetChatName(pid) ..
+            tes3mp.LogMessage(enumerations.log.INFO, "Player " .. logicHandler.GetChatName(pid) ..
                                                     " has a lower local skill in " .. name ..
                                                     " then the server has stored.")
-            self:LoadSkills() --Send the client the servers skills
+            player:LoadSkills() --Send the client the servers skills
             return customEventHooks.makeEventStatus(false,false)
         end
     end
