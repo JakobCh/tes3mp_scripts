@@ -71,13 +71,40 @@ jsonCellLoader.debug = false
 -- which might or might not have been copied from kanaFurniture https://github.com/Atkana/tes3mp-scripts
 -- or maybe its the other way around anyway we use this to check if a refId is a npc/creature
 local creatureList = {}
+---default npc
 local furnLoader = jsonInterface.load("custom/npc.json")
 for index, item in pairs(furnLoader) do
 	table.insert(creatureList, {name = item.Name, refId = item.ID, tip = "npc", need = "spawn"})
 end
+---custom npc records
+local furnLoader = jsonInterface.load("recordstore/npc.json")
+for key, value in pairs(furnLoader.permanentRecords) do
+    -- key would be "dun_bm_werewolf_maze1"
+    local name = value.name -- this would be "Werewolf"
+    table.insert(creatureList, {name = value.name, refId = key, tip = "npc", need = "spawn"})
+end
+for key, value in pairs(furnLoader.generatedRecords) do
+    -- key would be "dun_bm_werewolf_maze1"
+    local name = value.name -- this would be "Werewolf"
+    table.insert(creatureList, {name = value.name, refId = key, tip = "npc", need = "spawn"})
+end
+
+---default creatures
 local furnLoader = jsonInterface.load("custom/creature.json")
 for index, item in pairs(furnLoader) do
 	table.insert(creatureList, {name = item.FIELD3, refId = item.FIELD2, tip = "creature", need = "spawn"} )
+end
+---custom creature records
+local furnLoader = jsonInterface.load("recordstore/creature.json")
+for key, value in pairs(furnLoader.permanentRecords) do
+    -- key would be "dun_bm_werewolf_maze1"
+    local name = value.name -- this would be "Werewolf"
+    table.insert(creatureList, {name = value.name, refId = key, tip = "creature", need = "spawn"})
+end
+for key, value in pairs(furnLoader.generatedRecords) do
+    -- key would be "dun_bm_werewolf_maze1"
+    local name = value.name -- this would be "Werewolf"
+    table.insert(creatureList, {name = value.name, refId = key, tip = "creature", need = "spawn"})
 end
 
 
