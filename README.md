@@ -40,10 +40,18 @@ Example usage:
 
 /book clear
 
+## customSkills
+NOT DONE
+
+Library for making custom skills
+
 ## customSpells
 Just like a proof of concept tbh
 
 Have a lua function get called when someone casts a specific spell.
+
+## doorLinks
+Library that generates all cell connections using espParser, HAVEN'T TESTED WITH LATEST ESPPARSER
 
 ## espParser
 Helper file for other scripts to get data from esp/esm files.
@@ -59,6 +67,13 @@ Supposed to be used with kanaHousing.
 
 Usage: see the scriptfile
 
+## JCMining
+Runescape like mining 
+
+## jsonCellLoader
+Load a json file into the current cell.
+
+See the top of the script file for a readme
 
 ## loadtxt2esp
 Load TXT2ESP4 files into a cell
@@ -69,8 +84,12 @@ Example: I've included the default example file from TXT2ESP4 and you should be 
 
 Problems: There are no admin checks so anyone can run the command. Doors dont work
 
+## memoryInfo
+Commands for interacting with the lua garbage collector
 
-## jsonCellLoader
-Load a json file into the current cell.
+## openmwcfg
+Library for using values from the openmw.cfg file
 
-See the top of the script file for a readme
+## PlayerSkillResetFix
+Prevents players base skills from decreasing
+
