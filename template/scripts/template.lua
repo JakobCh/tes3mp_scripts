@@ -4,7 +4,7 @@ Name: template
 Version: 0.1
 Tes3mp Version: 0.8
 Author: JakobCh
-Update date: 2022-02-10
+Last update: 2022-02-10
 
 Description:
     None
