@@ -1,24 +1,30 @@
 --[[
-    MemoryInfo Version 0.1
 
-    Description:
-        Randomly decided to make this after I remembered lua has some garbage collection bindings
+Name: memoryInfo
+Version: 0.1
+Tes3mp Version: 0.8
+Author: JakobCh
+Last update: 2022-02-10
 
-    Install:
-	    Put this file in server/scripts/custom/
-        Put [ require("custom.memoryInfo") ] in customScripts.lua
-        
-    Commands:
-        /memoryinfo: Print memory usage
-        /memoryinfo collect: Runs garbage collection
-        /memoryinfo step: Runs a garbage collection step
+Description:
+    Commands to get memory usage and run garbage collection
 
+Install:
+	Put this file in server/scripts/custom/
+	Put [ require("custom.memoryInfo") ] in server/scripts/customScripts.lua
 
+Commands:
+    /memoryinfo: Print memory usage
+    /memoryinfo collect: Runs garbage collection
+    /memoryinfo step: Runs a garbage collection step
 
+Known issues/TODO:
+    None
 ]]
 
+
 local function myPrint(text)
-    tes3mp.LogMessage(enumerations.log.INFO, "[MemoryInfo]: " ..text)
+    tes3mp.LogMessage(enumerations.log.INFO, "[memoryInfo]: " ..text)
 end
 
 local function getMemoryFormated()
