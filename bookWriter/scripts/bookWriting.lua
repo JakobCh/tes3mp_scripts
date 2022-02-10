@@ -1,22 +1,30 @@
 --[[
-Version: 0.2 for 0.7-alpha
+
+Name: bookWriting
+Version: 0.3
+Tes3mp Version: 0.8
+Author: JakobCh
+Last update: 2022-02-10
+
+Description:
+    Allows players to create custom books
 
 Install:
 	Put this file in server/scripts/custom/
-	Put [ require("custom.bookWriting") ] in customScripts.lua
+	Put [ require("custom.bookWriting") ] in server/scripts/customScripts.lua
 
 Commands:
     /book: Help menu
     /book title <text>: Set the Name of the book
     /book addtext <text>: Add text to the book
-    /book settext <text>: Set the text in the book (will remove all previus text)
+    /book settext <text>: Set the text in the book (will remove all previous text)
     /book listsyles: lists all the styles
     /book setstyle: sets the style the book is going to use
-    /book done: Creates the book
+    /book done: Creates the book (can be used several times at long as you dont use /book clear)
     /book clear: Deletes the book
 
-Good to know:
-    You can use "/book done" several times as long at you dont use "/book clear" to make several copies of your book
+Known issues/TODO:
+    None
 ]]
 
 
@@ -31,7 +39,7 @@ table.insert(bookWriting.bookStyles, {model = "m\\Text_Parchment_02.nif", icon =
 table.insert(bookWriting.bookStyles, {model = "m\\Text_Note_02.nif", icon = "m\\Tx_note_02.tga", scroll = true, name = "Note"} )
 table.insert(bookWriting.bookStyles, {model = "m\\Text_Octavo_06.nif", icon = "m\\Tx_book_03.tga", scroll = false, name = "Lesson of Vivec"} )
 
-bookWriting.nameSymbol = "~" --the symbol used before and after book names to differintiate them from vanila books
+bookWriting.nameSymbol = "~" --the symbol used before and after book names to differentiate them from vanila books
 
 
 local msg = function(pid, text)
@@ -129,7 +137,7 @@ function bookWriting.createBook(pid)
     book["icon"] = icon --"m\\Tx_note_02.tga"
     book["skillId"] = "-1"
     book["model"] = model --"m\\Text_Note_02.nif"
-    book["text"] = bookWriting.currentBooks[name].text
+    book["text"] = bookWriting.currentBooks[name].text .. "<BR>" --Morrowind doesn't like not having atleast one line :/
     book["value"] = 1
     book["scrollState"] = scroll --false --true
     book["name"] = bookWriting.nameSymbol .. bookWriting.currentBooks[name].title .. bookWriting.nameSymbol
