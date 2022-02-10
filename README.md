@@ -1,6 +1,7 @@
 # tes3mp_scripts
 
-My tes3mp(0.7-alpha) scripts, most of the readme stuff will be in the top of the script files.
+My tes3mp scripts, most of the readme stuff will be in the top of the script files.
+Most of these are still for the 0.7 version.
 
 ## autoDataFiles
 Will automaticaly make the server use the datafiles from your openmw config.
