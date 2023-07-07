@@ -61,6 +61,9 @@ REQUIRES https://github.com/iryont/lua-struct
 
 Usage: See espParserTest.lua
 
+## instancedHousing
+Player houseing using the new custom cells added on 0.8 (THIS IS NOT DONE)
+
 ## jcMarketplace
 Allows you to set a price on items and sell them, also blocks other people from picking stuff up.
 

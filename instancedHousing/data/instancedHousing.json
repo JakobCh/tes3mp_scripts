@@ -1,0 +1,16 @@
+{
+	"houses": {
+		"ihouse_house_jakob": {
+			"id": "ihouse_house_jakob",
+			"owner": "jakob"
+		}
+	},
+	"templates": {
+		{
+			"baseId": "Seyda Neen, Draren Thiralas' House",
+			"id": "ihouse_template_farmhouse",
+			"name": "Farm House"
+		}
+	}
+
+}
