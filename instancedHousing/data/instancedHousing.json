@@ -1,16 +1,31 @@
 {
-	"houses": {
-		"ihouse_house_jakob": {
-			"id": "ihouse_house_jakob",
-			"owner": "jakob"
-		}
-	},
-	"templates": {
-		{
-			"baseId": "Seyda Neen, Draren Thiralas' House",
-			"id": "ihouse_template_farmhouse",
-			"name": "Farm House"
-		}
-	}
-
+  "templates":{
+    "ihouse_template_test1":{
+      "spawn":{
+        "posX":271.90454101563,
+        "posZ":-120.78939819336,
+        "posY":308.57403564453,
+        "rotX":0.22441536188126,
+        "rotZ":0.98500847816467
+      },
+      "baseId":"Balmora, Clagius Clanler: Outfitter",
+      "shortId":"test1",
+      "name":"Test",
+      "id":"ihouse_template_test1"
+    }
+  },
+  "houses":{
+    "kneg":{
+      "spawn":{
+        "posX":271.90454101563,
+        "posZ":-120.78939819336,
+        "posY":308.57403564453,
+        "rotX":0.22441536188126,
+        "rotZ":0.98500847816467
+      },
+      "id":"ihouse_house_kneg",
+      "name":"Test",
+      "baseId":"Balmora, Clagius Clanler: Outfitter"
+    }
+  }
 }
